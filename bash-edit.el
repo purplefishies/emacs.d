@@ -6,7 +6,7 @@
   (interactive)
   (kill-emacs 2)
 )
-(global-set-key "\C-x\C-c" 'my-exit)
+(global-set-key "\C-x\C-v" 'my-exit)
 (add-hook 'after-init-hook #'my-init)
 (add-hook 'after-init-hook #'linum-mode)
 (setq-default major-mode 'shell-script-mode)
