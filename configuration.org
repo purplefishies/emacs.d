@@ -1,0 +1,3270 @@
+#+TITLE: Emacs Configuration
+#+AUTHOR: Jimi Damon
+#+EMAIL: jdamon@gmail.com
+#+OPTIONS: toc:nil num:nil
+
+
+* Configure =use-package=
+  :PROPERTIES:
+  :ID:       759893c6-4288-4189-9f35-38da6a58d734
+  :END:
+
+I use =use-package= to install and configure my packages. My =init.el= includes
+the initial setup for =package.el= and ensures that =use-package= is installed,
+since I wanna do that right away.
+
+This makes sure that =use-package= will install the package if it's not already
+available. It also means that I should be able to open Emacs for the first time
+on a fresh Debian box and have my whole environment automatically installed. I'm
+not /totally/ sure about that, but we're gettin' close.
+
+#+BEGIN_SRC emacs-lisp
+  (require 'use-package-ensure)
+  (setq use-package-always-ensure t)
+  (add-to-list 'load-path "~/elisp/org-mode/lisp")  
+  (require 'org-loaddefs)
+  ;; (package-initialize)
+  ;; (use-package straight)
+
+
+#+END_SRC
+
+Always compile packages, and use the newest version available.
+
+#+BEGIN_SRC emacs-lisp
+  (use-package auto-compile
+    :config (auto-compile-on-load-mode))
+
+  ;(setq load-prefer-newer nil)
+
+
+   (use-package dash)
+   (use-package queue)
+
+#+END_SRC
+
+
+* Personal information
+** Who am I? Where am I?
+   :PROPERTIES:
+   :ID:       72e1b13b-6988-426a-9c48-2d860f8807b3
+   :END:
+
+#+BEGIN_SRC emacs-lisp
+  (setq user-full-name "Jimi Damon"
+        user-mail-address "jdamon@gmail.com"
+        calendar-latitude 32.7157
+        calendar-longitude -117.1611
+        calendar-location-name "San Diego, CA")
+#+END_SRC
+
+* Utility Functions
+  :PROPERTIES:
+  :ID:       1b684389-edd3-4e74-bb79-538b30881323
+  :END:
+
+  Functions that came from Harry Schwartz's configuration.org , I just renamed them to jmd ( my
+  name ) so that they're easier to remember.
+#+BEGIN_SRC emacs-lisp
+  (defun jmd/kill-current-buffer ()
+    "Kill the current buffer without prompting."
+    (interactive)
+    (kill-buffer (current-buffer)))
+
+  (defun jmd/append-to-path (path)
+    "Add a path both to the $PATH variable and to Emacs' exec-path."
+    (setenv "PATH" (concat (getenv "PATH") ":" path))
+    (add-to-list 'exec-path path))
+
+  (defun jmd/add-auto-mode (mode &rest patterns)
+    "Add entries to `auto-mode-alist' to use `MODE' for all given file `PATTERNS'."
+    (dolist (pattern patterns)
+      (add-to-list 'auto-mode-alist (cons pattern mode))))
+#+END_SRC
+
+* Completions
+** Helm
+:PROPERTIES:
+:ID:       64ad626c-0362-4c48-80a9-b0a7b30c584c
+:END:
+  helm completion system
+#+begin_src emacs-lisp
+  (use-package helm
+    :config
+    (require 'helm-config)   
+    :init
+    (helm-mode 1)
+    :bind
+    (("M-x"     . helm-M-x)
+     ("C-x C-f" . helm-find-files)
+     ("C-x b"   . helm-mini)
+     ("C-x C-r" . helm-recentf)
+     ("C-c i"   . helm-imenu)
+     ("M-y"     . helm-show-kill-ring)
+     :map helm-map
+     ("C-z" . helm-select-action)
+     ("<tab>" . helm-execute-persistent-action)))
+#+end_src
+
+* UI preferences
+** Tweak window chrome
+   :PROPERTIES:
+   :ID:       b3bffee2-7b14-43b6-8eea-c68e52ca1d4e
+   :END:
+
+No scroll bar , Tool bar or Menu bar, with a simple function to restore it
+
+#+BEGIN_SRC emacs-lisp
+  (tool-bar-mode 0)
+  (menu-bar-mode 0)
+  (scroll-bar-mode -1)
+  (defun jmd/show-menu ()
+    "Enables the menu"
+    (interactive)
+    (menu-bar-mode 1))
+#+END_SRC
+
+There's a tiny scroll bar that appears in the minibuffer window. This disables
+that:
+
+#+BEGIN_SRC emacs-lisp
+  (set-window-scroll-bars (minibuffer-window) nil nil)
+#+END_SRC
+
+The default frame title isn't useful. This binds it to the name of the current
+project:
+
+#+BEGIN_SRC emacs-lisp
+  (setq frame-title-format '((:eval (projectile-project-name))))
+#+END_SRC
+
+** Use fancy lambdas
+   :PROPERTIES:
+   :ID:       d921e871-32c3-49a2-9625-a866e9eb3eca
+   :END:
+
+Why not?
+
+#+BEGIN_SRC emacs-lisp
+  (global-prettify-symbols-mode t)
+#+END_SRC
+
+** Load up a theme
+   :PROPERTIES:
+   :ID:       d98d2074-979f-47f4-96c0-225ae914e39e
+   :END:
+
+I'm currently using the "sanityinc-tomorrow-bright" theme. I like a barely transparent 
+window on top of a cool european city backdrop. I like the Sanityinc tomorrow theme, but 
+I'm still not sure why this can't be loaded through use-package
+
+#+BEGIN_SRC emacs-lisp
+   (use-package color-theme-sanityinc-tomorrow)
+  ;(require 'color-theme-sanityinc-tomorrow)
+
+  (defun transparency (value)
+    "Sets the transparency of the frame window. 0=transparent/100=opaque."
+    (interactive "nTransparency Value 0 - 100 opaque:")
+    (set-frame-parameter (selected-frame) 'alpha value))
+
+  (defun jmd/apply-theme ()
+    "Apply the `solarized-light' theme and make frames just slightly transparent."
+    (interactive)
+    (color-theme-sanityinc-tomorrow-bright)
+    ;; (load-theme 'solarized-light t)
+    (transparency 96))
+#+END_SRC
+
+If this code is being evaluated by =emacs --daemon=, ensure that each subsequent
+frame is themed appropriately.
+
+#+BEGIN_SRC emacs-lisp
+  (if (daemonp)
+      (add-hook 'after-make-frame-functions
+                (lambda (frame)
+                  (with-selected-frame frame (jmd/apply-theme))))
+    (jmd/apply-theme))
+#+END_SRC
+
+** Use =moody= for a beautiful modeline
+   :PROPERTIES:
+   :ID:       b26af65b-131c-490e-a618-6056bcfa0301
+   :END:
+
+This gives me a truly lovely ribbon-based modeline.
+
+#+BEGIN_SRC emacs-lisp
+  (use-package moody
+    :config
+    (setq x-underline-at-descent-line t)
+    (moody-replace-mode-line-buffer-identification)
+    (moody-replace-vc-mode))
+#+END_SRC
+
+** Use =minions= to hide all minor modes
+   :PROPERTIES:
+   :ID:       6820cb0d-db18-49a4-be39-835754345073
+   :END:
+
+I never want to see a minor mode, and manually adding =:diminish= to every
+use-package declaration is a hassle. This uses =minions= to hide all the minor
+modes in the modeline. Nice!
+
+By default there's a =;-)= after the major mode; that's an adorable default, but
+I'd rather skip it.
+
+#+BEGIN_SRC emacs-lisp
+   (use-package minions
+     :config
+     (setq minions-mode-line-lighter ""
+           minions-mode-line-delimiters '("" . ""))
+     (minions-mode 1))
+#+END_SRC
+
+** Disable visual bell
+   :PROPERTIES:
+   :ID:       e6022e60-2b62-4fd8-a991-1f95a507254a
+   :END:
+
+=sensible-defaults= replaces the audible bell with a visual one, but I really
+don't even want that (and my Emacs/Mac pair renders it poorly). This disables
+the bell altogether.
+
+#+BEGIN_SRC emacs-lisp
+  (setq ring-bell-function 'ignore)
+#+END_SRC
+
+** Scroll conservatively
+   :PROPERTIES:
+   :ID:       ccb2a869-abe6-4ce1-a488-997f9331bc08
+   :END:
+
+When point goes outside the window, Emacs usually recenters the buffer point.
+I'm not crazy about that. This changes scrolling behavior to only scroll as far
+as point goes.
+
+#+BEGIN_SRC emacs-lisp
+;  (setq scroll-conservatively 100)
+   ;; scroll one line at a time (less "jumpy" than defaults)
+    (setq mouse-wheel-scroll-amount '(1 ((shift) . 1))) ;; one line at a time
+    ;(setq mouse-wheel-progressive-speed nil) ;; don't accelerate scrolling
+    (setq mouse-wheel-follow-mouse 't) ;; scroll window under mouse
+    ;(setq scroll-step 1) ;; keyboard scroll one line at a time
+#+END_SRC
+
+* General Appearance / Startup
+** Font Type
+   :PROPERTIES:
+   :ID:       0f5220a6-6c6e-4cd4-b7d6-8fd4458eeda9
+   :END:
+
+#+BEGIN_SRC emacs-lisp
+(set-frame-font "Monaco-12")
+#+END_SRC
+
+** Display / Color
+** Starting the Emacs Server
+   :PROPERTIES:
+   :ID:       0699fe67-413f-4db8-adbe-855fb3e91fb4
+   :END:
+#+BEGIN_SRC emacs-lisp
+;; (defvar server-socket-dir
+;;   (let ((uid (user-uid)))
+;;     (if (floatp uid)
+;;         (format "/tmp/emacs%1.0f" uid)
+;;       (format "/tmp/emacs%d" uid))))
+(require 'server)
+(server-ensure-safe-dir server-socket-dir)
+(server-start) 
+
+#+END_SRC 
+** X11 and Headless
+   :PROPERTIES:
+   :ID:       aab602a9-1b42-40f7-8ec6-a797af2bb7c8
+   :END:
+#+BEGIN_SRC emacs-lisp
+  (unless window-system
+    (when (getenv "DISPLAY")
+      ;; Callback for when user cuts
+      (defun xsel-cut-function (text &optional push)
+        ;; Insert text to temp-buffer, and "send" content to xsel stdin
+        (with-temp-buffer
+          (insert text)
+          ;; I prefer using the "clipboard" selection (the one the
+          ;; typically is used by c-c/c-v) before the primary selection
+          ;; (that uses mouse-select/middle-button-click)
+          (call-process-region (point-min) (point-max) "xsel" nil 0 nil "--clipboard" "--input")))
+      ;; Call back for when user pastes
+      (defun xsel-paste-function()
+        ;; Find out what is current selection by xsel. If it is different
+        ;; from the top of the kill-ring (car kill-ring), then return
+        ;; it. Else, nil is returned, so whatever is in the top of the
+        ;; kill-ring will be used.
+        (let ((xsel-output (shell-command-to-string "xsel --clipboard --output")))
+          (unless (string= (car kill-ring) xsel-output)
+            xsel-output )))
+      ;; Attach callbacks to hooks
+      (setq interprogram-cut-function 'xsel-cut-function)
+      (setq interprogram-paste-function 'xsel-paste-function)
+      ;; Idea from
+      ;; http://shreevatsa.wordpress.com/2006/10/22/emacs-copypaste-and-x/
+      ;; http://www.mail-archive.com/help-gnu-emacs@gnu.org/msg03577.html
+      ))
+#+END_SRC
+
+** Clipboard
+   :PROPERTIES:
+   :ID:       df387849-dd5c-475a-81f4-9333ba0199aa
+   :END:
+#+BEGIN_SRC emacs-lisp
+  (setq x-select-enable-primary t)
+  (setq x-select-enable-clipboard t)
+  ;; (setq interprogram-paste-function 'x-cut-buffer-or-selection-value)
+#+END_SRC
+
+** Key Bindings
+   :PROPERTIES:
+   :ID:       045685ba-7c48-4440-8f27-6b3b8b6cea2b
+   :END:
+
+#+BEGIN_SRC emacs-lisp
+
+  (defun forward-word-correctly (&optional n)
+    "Jump forward a word at a time"
+    (interactive "P")
+    (search-forward-regexp "[][[()_@#A-Za-z0-9&\\*\\\-\\.\\$]+")
+                                          ; [A-Za-z0-9-]+"
+    )
+
+  (defun backward-word-correctly (&optional n)
+    "Jump backward a word at a time"
+    (interactive "P")
+    (let (i)
+      (search-backward-regexp "\\b[ ]+")
+                                          ;    (search-backward-regexp "[A-Za-z0-9_=)]+")
+                                          ;    (search-backward-regexp "[A-Za-z0-9_=\-\\)\\(]+")
+      )
+    )
+
+  (global-set-key "\C-xg" 'goto-line)
+  (global-set-key "\C-b" 'backward-kill-word)
+  (global-set-key "\C-n" 'kill-word)
+  (global-set-key "\C-f" 'backward-word)
+  (global-set-key "\M-s" 'search-forward-regexp)
+  (global-set-key "\C-g" 'forward-word-correctly)
+                                          ; New binding to try out
+  (global-set-key "\M-b" 'backward-sexp)
+  (global-set-key "\M-n" 'forward-sexp)
+
+  (global-set-key "\C-cc" 'comment-region)
+  (global-set-key [(control left)]    'backward-word-correctly)
+  (global-set-key [(control right)] 'forward-word-correctly)
+#+END_SRC
+** ANSI colors
+   :PROPERTIES:
+   :ID:       7d3097aa-992e-4873-b88f-c8fc1251c8ad
+   :END:
+#+BEGIN_SRC emacs-lisp
+  (defun display-ansi-colors ()
+    (interactive)
+    (let ((inhibit-read-only t))
+      (ansi-color-apply-on-region (point-min) (point-max))))
+#+END_SRC
+** Disabling electric parentheses
+   :PROPERTIES:
+   :ID:       821f99ac-c10b-4a8f-96d0-1fa3e3f42f04
+   :END:
+#+BEGIN_SRC emacs-lisp
+  (electric-indent-mode -1)
+  (add-hook 'after-change-major-mode-hook (lambda() (electric-indent-mode -1)))
+#+END_SRC
+** ROS Formatting
+   :PROPERTIES:
+   :ID:       db9c9229-77f6-4e8a-8986-abbc751c7237
+   :END:
+
+   Setting the formatting and give a bind key
+#+BEGIN_SRC emacs-lisp
+(defun run-ros-clang-format ()
+  "Runs clang-format on cpp,h files in catkin_ws/ and reverts buffer."
+  (interactive)
+  (and
+   ;(princ "HERE")
+   (string-match "/\\(catkin_ws\\|catkin_.*\\)/.*\\.\\(h\\|cpp\\)$" buffer-file-name)
+   ;(princ "THERE")
+   (save-some-buffers 'no-confirm)
+   (shell-command (concat "clang-format -i -style=file " buffer-file-name))
+   ;(princ "OTHER")
+   (message (concat "Saved and ran clang-format on " buffer-file-name))
+   (revert-buffer t t t)
+))
+
+(global-set-key [f7] 'run-ros-clang-format)
+#+END_SRC
+** Work formatting
+   :PROPERTIES:
+   :ID:       d9a29cfd-2707-46c1-be8c-7e094d29727a
+   :END:
+#+begin_src emacs-lisp
+;; (load "/usr/share/emacs/site-lisp/clang-format-12/clang-format.el" )
+;; (global-set-key [f7] 'clang-format-region)
+(defun run-clang-format ()
+  "Runs clang-format on cpp,h files in catkin_ws/ and reverts buffer."
+  (interactive)
+  (and
+   (save-some-buffers 'no-confirm)
+   (shell-command (concat "clang-format -i -style=file " buffer-file-name))
+   (message (concat "Saved and ran clang-format on " buffer-file-name))
+   (revert-buffer t t t)
+))
+#+END_SRC
+** ROS Compilation
+   :PROPERTIES:
+   :ID:       d94f90b5-57ee-49b0-abcd-ef46d6c74172
+   :END:
+
+   A cool compilation tool to run catkin builds inside 
+#+begin_src emacs-lisp
+  ;; Based on https://www.seas.upenn.edu/~chaoliu/2018/03/12/ros-programming-in-emacs/#org8817889
+  (require 'ansi-color)
+  (defun endless/colorize-compilation ()
+    "Colorize from `compilation-filter-start' to `point'."
+    (let ((inhibit-read-only t))
+      (ansi-color-apply-on-region
+       compilation-filter-start (point))))
+
+  (add-hook 'compilation-filter-hook #'endless/colorize-compilation)
+
+  (defun ros-catkin-make (dir)
+    "Run catkin_make command in DIR."
+    (interactive (list (file-name-directory (buffer-file-name))))
+    (let* ((default-directory dir)
+           (compilation-buffer-name-function (lambda (major-mode-name) "*catkin_make*")))
+      (compile "catkin bt --no-status"))
+    ;; (switch-to-buffer (get-buffer "*catkin_make*"))
+    (switch-to-buffer-other-window (get-buffer-create "*catkin_make*"))
+    )
+
+  (defun ros-catkin-make-tests (dir)
+    "Run catkin_make command in DIR."
+    (interactive (list (file-name-directory (buffer-file-name))))
+    (let* ((default-directory dir)
+           (compilation-buffer-name-function (lambda (major-mode-name) "*catkin_make*")))
+      (compile "catkin run_tests --this --no-status"))
+    ;; (switch-to-buffer (get-buffer "*catkin_make*"))
+    (switch-to-buffer-other-window (get-buffer-create "*catkin_make*"))
+    )
+
+  (global-set-key [f5] 'ros-catkin-make)
+#+end_src
+
+** Enable compilations with color
+   :PROPERTIES:
+   :ID:       2f63ab28-a315-443d-beb5-2bab4f46fed9
+   :END:
+
+#+BEGIN_SRC emacs-lisp
+(require 'ansi-color)
+(defun colorize-compilation-buffer ()
+  (toggle-read-only)
+  (ansi-color-apply-on-region compilation-filter-start (point))
+  (toggle-read-only))
+(add-hook 'compilation-filter-hook 'colorize-compilation-buffer)
+#+END_SRC
+** GDB exit upon receiving Quit
+   :PROPERTIES:
+   :ID:       b8effbe3-f89b-422d-8d43-6ad33d8efb12
+   :END:
+#+BEGIN_SRC emacs-lisp
+(defvar all-gud-modes
+  '(gud-mode comint-mode gdb-locals-mode gdb-frames-mode  gdb-breakpoints-mode)
+  "A list of modes when using gdb")
+(defun kill-all-gud-buffers ()
+  "Kill all gud buffers including Debugger, Locals, Frames, Breakpoints.
+Do this after `q` in Debugger buffer."
+  (interactive)
+  (save-excursion
+        (let ((count 0))
+          (dolist (buffer (buffer-list))
+                (set-buffer buffer)
+                (when (member major-mode all-gud-modes)
+                  (setq count (1+ count))
+                  (kill-buffer buffer)
+                  (delete-other-windows))) ;; fix the remaining two windows issue
+          (message "Killed %i buffer(s)." count))))
+#+END_SRC
+** Ibuffer 
+   :PROPERTIES:
+   :ID:       f908b2a5-f672-496c-bd13-52e0770a9c26
+   :END:
+#+begin_src emacs-lisp
+  (global-set-key (kbd "C-x C-b") 'ibuffer)
+  (require 'ibuf-ext)
+  (add-to-list 'ibuffer-never-show-predicates "^\\*")  
+#+end_src
+** Screenshots
+   :PROPERTIES:
+   :ID:       08473751-5d5a-4c06-9ee4-6ba0a9d9fe05
+   :END:
+#+begin_src emacs-lisp
+(defun my-org-screenshot ()
+  "Take a screenshot into a time stamped unique-named file in the
+same directory as the org-buffer and insert a link to this file."
+  (interactive)
+  (setq filename
+        (concat
+         (make-temp-name
+          (concat (file-name-nondirectory (buffer-file-name))
+                  "_"
+                  (format-time-string "%Y%m%d_%H%M%S_")) ) ".png"))
+  (call-process "import" nil nil nil filename)
+  (insert (concat "[[./" (file-name-nondirectory filename) "]]"))
+  (org-display-inline-images))
+#+end_src
+
+* Project management
+
+I use a few packages in virtually every programming or writing environment to
+manage the project, handle auto-completion, search for terms, and deal with
+version control. That's all in here.
+
+** =ag=
+   :PROPERTIES:
+   :ID:       73c097c1-be36-471e-a6b7-199fbb266e89
+   :END:
+
+Set up =ag= for displaying search results.
+
+#+BEGIN_SRC emacs-lisp
+  (use-package ag
+ :after (dash queue)
+)
+#+END_SRC
+
+** =company=
+   :PROPERTIES:
+   :ID:       cc25cfc9-9f1d-4243-b424-e19f80e2b33a
+   :END:
+
+Use =company-mode= everywhere.
+
+#+BEGIN_SRC emacs-lisp
+  (use-package company)
+  (add-hook 'after-init-hook 'global-company-mode)
+#+END_SRC
+
+Use =M-/= for completion.
+
+#+BEGIN_SRC emacs-lisp
+  (global-set-key (kbd "M-/") 'company-complete-common)
+#+END_SRC
+
+** =dumb-jump=
+   :PROPERTIES:
+   :ID:       fa62dee8-2153-43a7-acf0-2ca6d8aaaf3f
+   :END:
+
+The =dumb-jump= package works well enough in a [[https://github.com/jacktasia/dumb-jump#supported-languages][ton of environments]], and it
+doesn't require any additional setup. I've bound its most useful command to
+=M-.=.
+
+#+BEGIN_SRC emacs-lisp
+  (use-package dumb-jump
+    :config
+    ;; (define-key evil-normal-state-map (kbd "M-.") 'dumb-jump-go)
+    (setq dumb-jump-selector 'ivy))
+#+END_SRC
+
+** =flycheck=
+   :PROPERTIES:
+   :ID:       aab1fb3d-a834-4ee4-b3a7-5e36bb92e4f0
+   :END:
+
+
+ #+BEGIN_SRC emacs-lisp
+   (use-package flycheck)
+ #+END_SRC
+
+** =magit=
+   :PROPERTIES:
+   :ID:       1552bb6b-9bd0-457b-8f57-afd4746984bf
+   :END:
+
+I use =magit= to handle version control. It's lovely, but I tweak a few things:
+
+- I bring up the status menu with =C-x g=.
+- Use =evil= keybindings with =magit=.
+- The default behavior of =magit= is to ask before pushing. I haven't had any
+  problems with accidentally pushing, so I'd rather not confirm that every time.
+- Per [[http://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html][tpope's suggestions]], highlight commit text in the summary line that goes
+  beyond 50 characters.
+- On the command line I'll generally push a new branch with a plain old =git
+  push=, which automatically creates a tracking branch on (usually) =origin=.
+  Magit, by default, wants me to manually specify an upstream branch. This binds
+  =P P= to =magit-push-implicitly=, which is just a wrapper around =git push
+  -v=. Convenient!
+- I'd like to start in the insert state when writing a commit message.
+
+#+BEGIN_SRC emacs-lisp
+  ;; (use-package magit
+  ;;   :bind
+  ;;   ("C-x C-x g" . magit-status)
+
+  ;;   :config
+  ;;   (use-package evil-magit)
+  ;;   (use-package with-editor)
+  ;;   (setq magit-push-always-verify nil)
+  ;;   (setq git-commit-summary-max-length 50)
+
+  ;;   (with-eval-after-load 'magit-remote
+  ;;     (magit-define-popup-action 'magit-push-popup ?P
+  ;;       'magit-push-implicitly--desc
+  ;;       'magit-push-implicitly ?p t))
+
+  ;;   (add-hook 'with-editor-mode-hook 'evil-insert-state))
+#+END_SRC
+
+I've been playing around with the newly-released =forge= for managing GitHub PRs
+and issues. Seems slick so far.
+
+#+BEGIN_SRC emacs-lisp
+  ;; (use-package ghub)
+  ;; (use-package forge)
+#+END_SRC
+
+** =projectile=
+   :PROPERTIES:
+   :ID:       3aa1638f-e141-4c4b-9b53-0027a8d7bdc8
+   :END:
+
+Projectile's default binding of =projectile-ag= to =C-c p s s= is clunky enough
+that I rarely use it (and forget it when I need it). This binds it to the
+easier-to-type =C-c v= to useful searches.
+
+Bind =C-p= to fuzzy-finding files in the current project. We also need to
+explicitly set that in a few other modes.
+
+I use =ivy= as my completion system.
+
+When I visit a project with =projectile-switch-project=, the default action is
+to search for a file in that project. I'd rather just open up the top-level
+directory of the project in =dired= and find (or create) new files from there.
+
+I'd like to /always/ be able to recursively fuzzy-search for files, not just
+when I'm in a Projectile-defined project. I use the current directory as a
+project root (if I'm not in a "real" project).
+
+#+BEGIN_SRC emacs-lisp
+  (use-package projectile
+    :bind
+    ("C-c v" . 'projectile-ag)
+
+    :config
+    ;; (define-key evil-normal-state-map (kbd "C-p") 'projectile-find-file)
+    ;; (evil-define-key 'motion ag-mode-map (kbd "C-p") 'projectile-find-file)
+    ;; (evil-define-key 'motion rspec-mode-map (kbd "C-p") 'projectile-find-file)
+
+    (setq projectile-completion-system 'ivy)
+    (setq projectile-switch-project-action 'projectile-dired)
+    (setq projectile-require-project-root nil))
+#+END_SRC
+
+** =undo-tree=
+   :PROPERTIES:
+   :ID:       ec238dcf-37dd-42d8-9379-53cf863cd2fb
+   :END:
+
+I like tree-based undo management. I only rarely need it, but when I do, oh boy.
+
+#+BEGIN_SRC emacs-lisp
+  (use-package undo-tree)
+#+END_SRC
+
+* Language Support and Development Environments
+
+** C / C++
+
+*** C Hooks 
+    :PROPERTIES:
+    :ID:       3c59d358-96a7-4aca-866d-5f3ab6f7a78f
+    :END:
+#+begin_src emacs-lisp
+  (defun my-c-mode-hook ()
+    (hs-minor-mode))
+  (add-hook 'c++-mode-hook 'my-c-mode-hook)
+
+#+end_src
+
+*** Adds custom C/C++ headers 
+    :PROPERTIES:
+    :ID:       32b232e7-cbba-4fca-a9cf-e978eb6c7ed7
+    :END:
+#+BEGIN_SRC emacs-lisp
+  (defun add-c-function-header( &optional n)
+    "Add a default header to a subroutine"
+    (interactive "P")
+    (setq i 0 )
+    (if n 
+        (setq count n )
+      (setq count (/ PERL_HEADER_LENGTH 2))
+      )
+    (insert "/*")
+    (dotimes (i count)
+      (insert "**")
+      )
+    (insert "\n")
+    (insert " * fn::name= ")
+    (yank)
+    (insert "\n")
+    (insert " * fn::desc= \n")
+    (insert " * fn::args= \n")
+    (insert " * fn::return= \n")
+    (insert " * fn::notes=\n")
+    (insert " * fn::todo= \n *")
+    (dotimes (i (- count 1))
+      (insert "**")
+      )
+    (insert "*/")
+
+    )
+#+END_SRC
+
+** Perl
+   :PROPERTIES:
+   :ID:       f1173357-484c-40a3-b3a4-eb35c8c1b19e
+   :END:
+
+   Adds Perl headers
+#+BEGIN_SRC emacs-lisp
+  (defun add-perl-header( &optional n) 
+    "Add a default header line at the start of a script"
+    (interactive "P")                     ;need this for args
+    (let (i j)
+      (setq i 0 )
+      ;;  (princ PERL_HEADER_LENGTH)
+      (if n 
+          (progn
+            (setq count n) 
+            )
+        (setq count PERL_HEADER_LENGTH)
+        )
+      (insert "#")
+      (dotimes (i count)
+        (insert "*")
+        )
+      (let (fname prefix suffix )
+        (setq fname (buffer-name))
+        (string-match ".*\\.\\(.*\\)" fname)
+        (setq suffix (match-string 1 fname))
+        (setq prefix (perl-suffix-lookup suffix))
+        (insert "\n")
+        (insert "# " prefix "::name= " fname "\n")
+        (insert "# " prefix "::desc=\n" )
+        (insert "# " prefix "::author= " (user-real-login-name) "\n")
+        (insert "# " prefix "::cvs= $Id$\n")
+        (insert "# " prefix "::changed= $Date$\n")
+        (insert "# " prefix "::modusr= $Author$\n")
+        (insert "# " prefix "::notes=\n")
+        (insert "# " prefix "::todo=\n#")
+        (dotimes (i count)
+          (insert "*"))
+        (insert "\n")
+        );let
+      (insert "\n\n\n")
+      ( _add-perl-divider "LIBRARIES")
+      (insert "\n\n")
+      ( _add-perl-divider "GLOBAL VARIABLES")
+      (insert "\n\n")
+      ( _add-perl-divider "CODE")
+      (insert "\n\n")
+      ( _add-perl-divider "SUBROUTINES")
+      );let
+    );defun
+
+  (defun perl-suffix-lookup (n)
+    "Looks up the tail of a perl script and determines what the header name should be"
+                                          ;  (interactive "P")
+    (cond ((string= n "pl") "script")
+          ((string= n "pm")  "mod" )
+          ((string= n "module") "mod" )
+          ((string= n "script") "script")
+          (t "script"))
+    )
+
+  (defun add-perl-sub-header( &optional n)
+    "Add a default header to a subroutine"
+    (interactive "P")
+    (setq i 0 )
+    (if n 
+        (setq count n )
+      (setq count (/ PERL_HEADER_LENGTH 2))
+      )
+    (insert "#")
+
+    (dotimes (i count)
+      (insert "=-")
+      )
+    (insert "\n")
+    (insert "# sub::name= ")
+    (yank)
+    (insert "\n")
+    (insert "# sub::desc= \n")
+    (insert "# sub::args= \n")
+    (insert "# sub::return= \n")
+    (insert "# sub::notes= \n")
+    (insert "# sub::todo=\n#")
+    (dotimes (i count)
+      (insert "=-")
+      )
+    )
+
+  (defun _add-perl-divider( &optional n char)
+    "Add a Label in the middle of a line"
+    (interactive "P")
+    (setq char nil)
+    (if n 
+        (let (strln)
+          (setq strln (length n))
+          (setq i 0 )
+          (if n 
+              (setq count n )
+            (setq count (/ PERL_HEADER_LENGTH 2) )
+            )
+          (insert "#")
+          (let (tmp_length extra) 
+            (setq tmp_length (/ (- PERL_HEADER_LENGTH strln 4) 2))
+            (setq extra (mod (- PERL_HEADER_LENGTH strln 4) 2))
+            (dotimes (i tmp_length)
+              (insert "*"))
+            (insert (format "  %s  " n ))
+            (dotimes (i tmp_length)
+              (insert "*"))
+            (if (= extra 1)
+                (insert "*"))
+            )
+
+          )
+      nil
+      )
+    t
+    )
+
+  (defun add-perl-top-banner( &optional n )
+    "Adds a top banner to the Perl subroutine"
+    (interactive "P")
+    (let (i count)
+      (if n 
+          (setq count n )
+        (setq count (/ PERL_HEADER_LENGTH 2))
+        )
+      (insert "#")
+      (dotimes (i count)
+        (insert "=-")
+        )
+      (insert "\n")
+      )
+    )
+#+END_SRC 
+
+** Skill
+   :PROPERTIES:
+   :ID:       323e1b41-a708-4cb5-9f43-a535a6ebd86e
+   :END:
+   Formatting functions for Scheme / Skill
+
+#+begin_src emacs-lisp
+  (defun skill-suffix-lookup (n)
+    "Looks up the tail of a perl script and determines what the header name should be"
+                                          ;  (interactive "P")
+    (cond ((string= n "ils") "skclass")
+          ((string= n "il")  "skill" )
+          (t "script"))
+    )
+
+  (defun add-skill-divider( &optional n)
+    "Add a Skill divider"
+    (interactive "P")
+    (let (function_name return_type function_args
+                        args i tmp)
+      (setq a (point-marker))
+      (end-of-line)
+      (kill-region a (point-marker))
+      (setq line (car kill-ring-yank-pointer))
+      (_add-skill-divider line)
+      )
+    )
+
+  (defun _add-skill-divider( &optional n)
+    "Add a Label in the middle of a line"
+    (interactive "P")
+    (if n 
+        (let (strln)
+          (setq strln (length n))
+          (setq i 0 )
+          (if n 
+              (setq count n )
+            (setq count (/ PERL_HEADER_LENGTH 2) )
+            )
+          (insert ";")
+          (let (tmp_length extra) 
+            (setq tmp_length (/ (- PERL_HEADER_LENGTH strln 4) 2))
+            (setq extra (mod (- PERL_HEADER_LENGTH strln 4) 2))
+            (dotimes (i ( / tmp_length 2 ))
+              (insert "=~"))
+            (insert (format "  %s  " n ))
+            (dotimes (i (/ tmp_length 2 ) )
+              (insert "=~"))
+            (if (= extra 1)
+                (insert "="))
+                                          ;          (insert (format "\n%d\n" extra))
+            )
+
+          )
+      nil
+      )
+    t
+    )
+
+  (defun add-skill-class-header( &optional n) 
+    "Add a default header line at the Skill script"
+    (interactive "P")                     ;need this for args
+    (setq i 0 )
+    ;;  (princ PERL_HEADER_LENGTH)
+    (if n 
+        (progn
+          (setq count n) 
+          )
+      (setq count PERL_HEADER_LENGTH)
+      )
+    (insert ";")
+    (dotimes (i ( / count 2 ))
+      (insert "=~")
+      )
+    (let (fname prefix suffix) 
+      (setq fname (buffer-name))
+      (string-match ".*\\.\\(.*\\)" fname)
+      (setq suffix (match-string 1 fname))
+      (setq prefix (skill-suffix-lookup suffix))
+      (insert "\n")
+      (insert "; " prefix "::name= " fname "\n")
+      (insert "; " prefix "::desc=\n" )
+      (insert "; " prefix "::author= " (user-real-login-name) "\n")
+      (insert "; " prefix "::cvs= $Id$\n")
+      (insert "; " prefix "::changed= $Date$\n")
+      (insert "; " prefix "::modusr= $Author$\n")
+      (insert "; " prefix "::notes=\n")
+      (insert "; " prefix "::todo=\n;")
+      (dotimes (i (/ count 2))
+        (insert "=~")
+        );dotimes
+      (insert "\n" )
+      (insert ";\n")
+      (insert ";           Copyright (c) 2009, MaxLinear, Inc\n" )
+      (insert ";\n;")
+      (dotimes (i (/ count 2))
+        (insert "=~")
+        );dotimes
+      );let
+    );defun
+
+  (defun add-tex-stuff( &optional n )
+    "Adds the default TeX header stuff I like"
+    (interactive "P")
+    (insert "\\ifdefined\\MASTERDOCUMENT\n")
+    (insert "\\else\n")
+    (insert "\\documentclass{article}\n")
+    (insert "\\input{header}\n")
+    (insert "\\begin{document}\n")
+    (insert "\\fi\n")
+    (insert "\\ifdefined\\MASTERDOCUMENT\n")
+    (insert "\\endinput\n")
+    (insert "\\else\n" )
+    (insert "\\expandafter\\enddocument\n")
+    (insert "\\fi\n") 
+    )
+
+
+
+  (defun add-skill-top-banner( &optional n )
+    "Adds a Skill banner to the top of a subroutine"
+    (interactive "P")
+    (let (i count)
+      (if n 
+          (setq count n )
+        (setq count (/ PERL_HEADER_LENGTH 2))
+        )
+      (indent-for-tab-command)
+      (insert ";")
+      (dotimes (i count)
+        (insert "=~")
+        )
+      )
+    )
+
+  (defun add-skill-function-header( &optional n )
+    "Adds a Skill function header"
+    (interactive "P")
+    (let (function_name function_type start end indpos indent
+                        ) 
+      (beginning-of-line)
+      (setq start (point-marker (beginning-of-line)))
+      (setq indpos (point-marker (forward-sexp)))
+      (setq indent (- (marker-position indpos) (marker-position start)))
+      (end-of-line)
+      (copy-region-as-kill indpos (point-marker))
+      (setq line (car kill-ring-yank-pointer))
+                                          ;    (posix-string-match "^ *\( *\\([A-z0-9]+\\) *\(" line )
+      (posix-string-match "^ *\( *\\([A-z0-9]+\\) *\(?.*$" line )
+      (setq function_name ( match-string 1 line))
+      (copy-region-as-kill start indpos )
+      (setq line (car kill-ring-yank-pointer))
+      (posix-string-match "^ *\\([A-z0-9]+\\)$" line )
+      (setq function_type (match-string 1 line))
+      (goto-char (marker-position start))
+      (add-skill-top-banner)
+      (insert "\n")
+      (skill-fun-header-helper function_type function_name)
+                                          ;    (add-skill-top-banner)
+      (indent-for-tab-command)
+      )
+    )
+#+end_src
+** Maxima
+   :PROPERTIES:
+   :ID:       4ada1d84-08e8-4251-a45a-f2dcd65e00e3
+   :END:
+#+begin_src emacs-lisp
+
+ (autoload 'maxima-mode "maxima" "Maxima mode" t)
+ (autoload 'imaxima "imaxima" "Frontend for maxima with Image support" t)
+ (autoload 'maxima "maxima" "Maxima interaction" t)
+ (autoload 'imath-mode "imath" "Imath mode for math formula input" t)
+ (setq imaxima-use-maxima-mode-flag t)
+ (add-to-list 'auto-mode-alist '("\\.ma[cx]" . maxima-mode))
+#+end_src
+
+** ROS Launch file support 
+   :PROPERTIES:
+   :ID:       674752e9-4879-443b-8637-1860b478b1b9
+   :END:
+
+   These support launch files and test files (the same XML ) that must exist under the 
+   test/* directory
+#+begin_src emacs-lisp
+  (jmd/add-auto-mode
+   'xml-mode
+   "test\\/.*\\.test$"
+   "\\.launch$"
+   )
+#+end_src
+
+** I associate =shell-script-mode= wth by dot files 
+  (jmd/add-auto-mode
+   'shell-script-mode
+   "\.functions$"
+   "\.bashrc$"
+   "\.bash_alias$"
+   "\.profile"
+   )
+** Other languages
+   :PROPERTIES:
+   :ID:       e049b095-7923-4981-be17-efac8fea6984
+   :END:
+#+BEGIN_SRC emacs-lisp
+  (autoload 'vht-mode         "verilog"      "Vht programming mode" t)
+  (autoload 'c++-mode         "cc-mode"      "C++ programming mode" t)
+  (autoload 'c-mode           "cc-mode"      "C programming mode" t)
+  (autoload 'cvs-update       "pcl-cvs" t)
+  (autoload 'cvs-update-other-window "pcl-cvs" t)
+  (autoload 'hexl-find-file   "hexl"     "Edit file in hexl-mode." t)
+  (autoload 'perl-mode        "perl"     "Perl programming mode" t)
+  (autoload 'rdf-mode         "rdf"      "RDF analysis mode" t)
+  (autoload 'tm-mode          "tm"       "Time budget mode" t)
+  (autoload 'tcl-mode         "tcl"      "Tcl programming mode" t)
+  (autoload 'verilog-mode     "verilog"  "Verilog programming mode" t)
+  (autoload 'vm               "vm"       "VM mail reader" t)
+  (autoload 'spice-mode       "spice"    "Spice Mode"  t)
+  (autoload 'spectre-mode "spectre-mode" "Spectre Editing Mode" t)
+#+END_SRC
+
+** Linux Kernel Development
+   :PROPERTIES:
+   :ID:       1b87566a-3b7a-4189-967f-971a54aaa95f
+   :END:
+#+BEGIN_SRC emacs-lisp
+  (defun c-lineup-arglist-tabs-only (ignored)
+    "Line up argument lists by tabs, not spaces"
+    (let* ((anchor (c-langelem-pos c-syntactic-element))
+           (column (c-langelem-2nd-pos c-syntactic-element))
+           (offset (- (1+ column) anchor))
+           (steps (floor offset c-basic-offset)))
+      (* (max steps 1)
+         c-basic-offset)))
+
+  (add-hook 'c-mode-common-hook
+            (lambda ()
+              ;; Add kernel style
+              (c-add-style
+               "linux-tabs-only"
+               '("linux" (c-offsets-alist
+                          (arglist-cont-nonempty
+                           c-lineup-gcc-asm-reg
+                           c-lineup-arglist-tabs-only))))))
+
+  (add-hook 'c-mode-hook
+            (lambda ()
+              (let ((filename (buffer-file-name)))
+                ;; Enable kernel mode for the appropriate files
+                (when (and filename
+                           (string-match (expand-file-name "~/src/linux-trees")
+                                         filename))
+                  (setq indent-tabs-mode t)
+                  (c-set-style "linux-tabs-only")))))
+
+#+END_SRC
+** Custom C Styles
+*** Work
+    :PROPERTIES:
+    :ID:       4165d104-7bfc-4a43-bd5c-826f89c1ef7b
+    :END:
+#+begin_src emacs-lisp
+;; Create my personal style.
+(defconst my-c-style
+  '((c-tab-always-indent        . t)
+    (c-comment-only-line-offset . 4)
+    (fill-column  . 109 )
+    (c-basic-offset . 4)
+    (c-set-offset 'case-label 0)
+    (c-hanging-braces-alist     . ((substatement-open after)
+                                   (brace-list-open)))
+    (c-hanging-colons-alist     . ((member-init-intro before)
+                                   (inher-intro)
+                                   (case-label after)
+                                   (label after)
+                                   (access-label after)))
+    (c-cleanup-list             . (scope-operator
+                                   empty-defun-braces
+                                   defun-close-semi))
+    (c-offsets-alist            . ((arglist-close . c-lineup-arglist)
+                                   (substatement-open . 0)
+                                   (case-label        . 4)
+                                   (block-open        . 0)
+                                   (knr-argdecl-intro . -)))
+    (c-echo-syntactic-information-p . t)))
+;; ((c-mode . ((fill-column . 109)
+;;             (c-basic-offset . 8)
+;;             (eval . (c-set-offset 'substatement-open 0))
+;;             (eval . (c-set-offset 'statement-case-open 0))
+;;             (eval . (c-set-offset 'case-label 0))
+;;             (eval . (c-set-offset 'arglist-intro '++))
+;;             (eval . (c-set-offset 'arglist-close 0))
+;;             (eval . (c-set-offset 'arglist-cont-nonempty '(c-lineup-gcc-asm-reg c-lineup-arglist)))))
+;; "My C Programming Style")
+(c-add-style "PERSONAL" my-c-style)
+#+end_src
+*** Local variables
+    :PROPERTIES:
+    :ID:       21094873-c7aa-4461-8406-345db0887697
+    :END:
+    Use a file called .dir-locals.el. An example is as follows
+#+begin_src emacs-lisp
+  ;; ((nil . ((indent-tabs-mode . t)
+  ;;          (fill-column . 80)
+  ;;          (mode . auto-fill)))
+  ;;  (c-mode . ((c-file-style . "BSD")
+  ;;             (subdirs . nil)))
+  ;;  ("src/imported"
+  ;;   . ((nil . ((change-log-default-name
+  ;;               . "ChangeLog.local"))))))
+#+end_src
+
+** Maxima 
+   :PROPERTIES:
+   :ID:       84e5ceb8-d86c-4f5d-b142-60c214ccce9d
+   :END:
+#+BEGIN_SRC emacs-lisp
+  (setq imaxima-fnt-size "Huge")
+#+END_SRC
+
+** Tramp setup
+   :PROPERTIES:
+   :ID:       ee7816fe-07cd-489d-96bb-d737364cac3f
+   :END:
+#+BEGIN_SRC emacs-lisp
+;   (require 'tramp)
+;   (setq tramp-default-method "ssh")
+#+END_SRC
+
+** Doxymacs
+   :PROPERTIES:
+   :ID:       a39d0707-47f0-42ca-93f9-1b5b04031406
+   :END:
+#+BEGIN_SRC emacs-lisp
+  (condition-case nil
+      (require 'doxymacs)
+    (setq doxymacs-doxygen-style "JavaDoc")
+    (add-hook 'c-mode-common-hook'doxymacs-mode)
+    (add-hook 'c++-mode-common-hook'doxymacs-mode)
+    (error nil)
+    )
+#+END_SRC
+
+** Spice
+** Ruby
+   :PROPERTIES:
+   :ID:       e3c4f1c9-8caf-49f1-a4de-f065a3ed92fe
+   :END:
+
+I use =chruby= to switch between versions of Ruby. This sets a default version
+to use within Emacs (for things like =xmp= or =rspec=).
+
+#+BEGIN_SRC emacs-lisp
+  (setq jmd/ruby-version "2.5.3")
+
+  (use-package chruby
+    :config
+    (chruby jmd/ruby-version))
+
+  (jmd/add-auto-mode
+   'ruby-mode
+   "\\Gemfile$"
+   "\\.rake$"
+   "\\.gemspec$"
+   "\\Guardfile$"
+   "\\Rakefile$"
+   "\\Vagrantfile$"
+   "\\Vagrantfile.local$")
+#+END_SRC
+
+Ruby executables are installed in =~/.gem/ruby/<version>/bin=. This ensures that
+that's included in the path. In particular, we want that directory to be
+included because it contains the =xmpfilter= executable, which is used below.
+
+#+BEGIN_SRC emacs-lisp
+  (jmd/append-to-path (format "~/.gem/ruby/%s/bin" jmd/ruby-version))
+#+END_SRC
+
+Running tests from within Emacs is awfully convenient.
+
+#+BEGIN_SRC emacs-lisp
+  (use-package rspec-mode)
+#+END_SRC
+
+=rcodetools= provides =xmp=, which lets me evaluate a Ruby buffer and display
+the results in "magic" (=# =>=) comments.
+
+I disable warnings when running code through =xmp= because I disagree with a few
+of them (complaining about private =attr_reader=, especially) and they gunk up
+my buffer.
+** Yasnippets
+   :PROPERTIES:
+   :ID:       e4a12ef6-2a8a-4860-b7b0-6ef20324bad8
+   :END:
+
+#+begin_src emacs-lisp
+  ;; (use-package yasnippet
+  ;;   :ensure t 
+  ;;   :config 
+  ;;   (use-package yasnippet-snippets
+  ;;     :ensure t)
+  ;;   (yas-reload-all))
+#+end_src
+
+  Adding a custom snippet for Doxygen
+
+#+begin_src emacs-lisp
+(use-package semantic )
+;; # -*- mode: snippet -*-
+;; # name: dox
+;; # key: dox
+;; # type: command
+;; # --
+;; (let ((tag (senator-next-tag)))
+;;   (while (or (null tag)
+;;              (not (semantic-tag-of-class-p tag 'function)))
+;;     (setq tag (senator-next-tag)))
+;;   (let* ((name (semantic-tag-name tag))
+;;          (attrs (semantic-tag-attributes tag))
+;;          (args (plist-get attrs :arguments))
+;;          (return-name (plist-get attrs :type))
+;;          (idx 1))
+;;     (if (listp return-name)
+;;       (setq return-name (car return-name)))
+;;     (yas/expand-snippet
+;;      (format
+;;       "/**\n* @brief ${1:%s}\n*%s%s*/"
+;;       name
+;;       (mapconcat
+;;        (lambda (x)
+;;          (format "* @param %s ${%d:Description of %s}"
+;;                  (car x) (incf idx) (car x)))
+;;        args
+;;        "\n")
+;;       (if (and return-name (not (string-equal "void" return-name)))
+;;           (format " * @return ${%d:%s}\n" (incf idx) return-name)
+;;         "")))))
+#+end_src
+
+* Extra stuff
+  :PROPERTIES:
+  :ID:       e9ab343c-4e8e-4f1e-b294-9d38a5360c01
+  :END:
+#+BEGIN_SRC emacs-lisp
+    (add-hook 'emacs-lisp-mode-hook
+		(lambda ()
+		  (push '(">=" . ?≥) prettify-symbols-alist)))
+    (lambda (x y)
+      (if (>= x y)
+	  (something)
+	(something-else)))
+  ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+  ; Useful for copying and pasting in emacs in a terminal
+  ; Not sure if this will cause a bug or not
+  ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+    (defun now ()
+      "Insert string for the current time formatted like '2:34 PM' or 1507121460"
+      (interactive)                 ; permit invocation in minibuffer
+      (insert (format-time-string "%D %-I:%M %p"))
+      )
+
+  ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+  ; Compilation stuff
+  ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+    (defun save-all-and-compile ()
+      (save-some-buffers 1)
+      (compile compile-command))
+
+    (setq compilation-ask-about-save nil)
+    (global-set-key [f5] 'compile)
+
+    (setq TeX-PDF-from-DVI "Dvips") 
+    ;; (setq load-path (cons "~/elisp" load-path))
+
+    ;; (add-to-list 'load-path "/home/jdamon/.emacs.d/lisp")
+    ;; (add-to-list 'load-path "/home/jdamon/.emacs.d/lisp")
+    ;; (add-to-list 'load-path "/home/jdamon/.emacs.d/xcscope")
+
+    ;; (use-package auctex )
+    ;; (use-package auctex
+    ;; :defer t
+    ;; :ensure t)
+    (use-package tex
+    :ensure auctex)
+
+    (condition-case nil
+	(load "auctex.el" nil t t)
+      (load "preview-latex.el" nil t t)
+      (error nil)
+      )
+
+    (condition-case nil
+	(load "ggtags.elc" nil t t )
+      (add-hook 'c-mode-common-hook
+		(lambda ()
+		  (when (derived-mode-p 'c-mode 'c++-mode 'java-mode)
+		    (ggtags-mode 1))))
+      (error nil)
+      )
+    ;; (load "smart-compile.el" nil t t )
+  ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+  ; Auto compilation
+  ;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+    ;; (load "mode-compile.el" nil t t )
+    (defun mode-compile-quiet ()
+      (interactive)
+      (flet ((read-string (&rest args) ""))
+	(mode-compile)))
+
+    ;; Bury the compilation buffer when compilation is finished and successful.
+    (add-to-list 'compilation-finish-functions
+		 (lambda (buffer msg)
+		   (when 
+		       (bury-buffer buffer)
+		     (replace-buffer-in-windows buffer))))
+
+    ;; C-c C-% will set a buffer local hook to use mode-compile after saving
+    (global-set-key '[(ctrl c) (ctrl %)]
+		    (lambda () 
+		      (interactive)
+		      (if (member 'mode-compile-quiet after-save-hook)
+			  (progn
+			    (setq after-save-hook 
+				  (remove 'mode-compile-quiet after-save-hook))
+			    (message "No longer compiling after saving."))
+			(progn
+			  (add-to-list 'after-save-hook 'mode-compile-quiet)
+			  (message "Compiling after saving.")))))
+
+    ;; Prevent compilation buffer from showing up
+    ;; (defadvice compile (around compile/save-window-excursion first () activate)
+    ;;   (save-window-excursion ad-do-it))
+
+    ;; Bury the compilation buffer when compilation is finished and successful.
+    (add-to-list 'compilation-finish-functions
+		 (lambda (buffer msg)
+		   (when 
+		       (bury-buffer buffer)
+		     (replace-buffer-in-windows buffer))))
+
+    (setq compilation-scroll-output 'first-error)
+
+    ;; (require  'xcscope )
+    (define-key global-map [(control f4)]  'cscope-pop-mark)
+    (define-key global-map [(control f5)]  'cscope-find-this-text-string)
+    (define-key global-map [(control f6)]  'cscope-find-this-symbol)
+    (define-key global-map [(control f7)]  'cscope-find-functions-calling-this-function)
+    (define-key global-map [(control f8)]  'cscope-find-called-functions)
+    (define-key global-map [(control f9)]  'cscope-prev-symbol)
+    (define-key global-map [(control f10)] 'cscope-next-symbol)
+	   ;;; XEmacs backwards compatibility file
+    (line-number-mode t)
+					    ;(put 'my-operator 'scheme-indent-function 3)
+					    ; Stuff for setting up key bindings...
+
+  (condition-case nil
+      (require 'auto-complete-config)
+    (error nil)
+    )    
+
+  (defun describe-face-at-point ()
+    "Return face used at point."
+    (interactive)
+    (hyper-describe-face (get-char-property (point) 'face)))
+
+  (defun jump-down (&optional n )
+    "Jump downwards by n secions of 8 lines"
+    (interactive "P")
+    (let (i count)
+      (if n
+          (progn 
+            (setq count n)
+            )
+        (setq count 1)
+        )
+      (dotimes ( i count)
+        (forward-line (* 8 (+ i 1)))
+        )
+      )
+    )
+
+  (defun jump-up (&optional n )
+    "Jump upwards by n sections of 8 lines"
+    (interactive "P")
+    (let (i count)
+      (if n
+          (progn 
+            (setq count n)
+            )
+        (setq count 1)
+        )
+      (dotimes ( i count)
+        (forward-line (* -8 (+ i 1)))
+        )
+      )
+    )
+
+  (defun charlie-settings( &optional n )
+    "Setup the charlie settings"
+    (interactive "P")
+    (c-set-offset 'statement-block-intro 4)
+    (c-set-offset 'defun-block-intro 4)
+    )
+
+
+
+  (setq-default indent-tabs-mode nil)     ; Turn off default tabs
+  (setq inhibit-startup-message t)        ; Turn off start up message
+  (setq inhibit-default-init t)           ; Turn off default init and messages
+  (setq home-dir (getenv "HOME"))
+  (defvar PERL_HEADER_LENGTH 76
+    "Controls the length of headers")
+
+  (global-set-key [(control button2)] 'x-copy-primary-selection)
+  (global-set-key [(button4)] 'scroll-down)
+  (global-set-key [(button5)] 'scroll-up)
+  (global-set-key "\M-[a" 'jump-up)
+  (global-set-key "\M-[b" 'jump-down)
+  (global-set-key "\C-b" 'backward-kill-word)
+  (global-set-key "\C-n" 'kill-word)
+  (global-set-key "\M-?" 'help-command)
+  (global-set-key "\M-\C-s" 'shell)
+  (global-set-key "\M-\C-l" 'toggle-buffers-in-window)
+  (global-set-key "\C-xg" 'goto-line)
+  (global-set-key "\C-c\C-c" 'comment-region)
+  ;; (global-set-key (kbd "C-x C-b") 'ibuffer)
+  ;; (require 'ibuf-ext)
+  ;; (add-to-list 'ibuffer-never-show-predicates "^\\*")
+  ;; (add-to-list 'ibuffer-never-show-regexps "^\\*")
+
+
+  (global-set-key [(control right)] 'forward-word)
+  (global-set-key [(control left)]  'backward-word )
+  (define-key global-map [(control bracket)] 'backward-paragraph)
+  (defalias 'scroll-ahead 'scroll-up)
+  (defalias 'scroll-behind 'scroll-down)
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+; 
+; Defined functions for customization 
+;
+;=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+  (defun scroll-n-lines-ahead ( &optional n )
+    "Scroll Ahead N lines( 1 by default )."
+    (interactive "P")
+    (scroll-ahead (prefix-numeric-value n)))
+  (defun scroll-n-lines-behind (&optional n)
+    "Scroll Behind N lines( 1 by default )."
+    (interactive "P")
+    (scroll-behind (prefix-numeric-value n)))
+  (defun lets-test-it (&optional n )
+    "Examining the characteristics of parameters"
+    (interactive)                         ;no args
+    (princ n)
+    )
+
+  (require 'font-lock)
+  (defvar null-device "/dev/null")
+  (setq auto-mode-alist (append (list (cons "\\.scs$" 'spectre-mode)
+                                      (cons "\\.inp$" 'spectre-mode))
+                                auto-mode-alist))
+
+  (setq perl-indent-level 4)
+  (setq cperl-indent-level 4)
+  (setq cperl-font-lock t)
+  (setq cperl-syntaxify-by-font-lock t)
+  ;(cperl-set-style "BSD")   ; Need to find a way to specify the style with a variable...
+
+  (add-hook 'cperl-hook-mode 'outline-minor-mode)
+
+  (line-number-mode t)
+  (display-time )
+  (defun refill-mode (&optional arg)
+    "Refill Minor Mode"
+    (interactive "P")
+    (setq refill-mode
+          (if (null arg)
+              (not refill-mode)
+            (> (prefix-numeric-value arg) 0))
+
+          )
+    (make-local-hook 'after-change-functions)
+    (if refill-mode
+        (add-hook 'after-change-functions 'refill nil t)
+      (remove-hook 'after-change-functions 'refill t)
+      )
+    )
+
+  (defun writeroom ()
+    "Switches to a WriteRoom-like fullscreen style"
+    (interactive) 
+    (when (featurep 'aquamacs)
+      ;; switch to white on black
+      ;; (color-theme-initialize)
+      ;; (color-theme-clarity)
+      ;; (color-theme-scintilla)
+      ;; switch to Garamond 36pt
+      (aquamacs-autoface-mode 0)
+      (set-frame-font "-apple-garamond-medium-r-normal--36-360-72-72-m-360-iso10646-1")
+      ;; switch to fullscreen mode
+      (aquamacs-toggle-full-frame)))
+
+  (defun iconify-or-deiconify-frame-fullscreen-even ()
+    (interactive)
+    (if (eq (cdr (assq 'visibility (frame-parameters))) t)
+        (progn
+          (if (frame-parameter nil 'fullscreen) 
+              (aquamacs-toggle-full-frame))     
+                                          ;       (switch-to-buffer "*scratch*") 
+          (iconify-frame))
+      (make-frame-visible))) 
+  (define-key global-map "\C-z" #'iconify-or-deiconify-frame-fullscreen-even)
+
+  (defun skill-fun-header-helper( name function_name )
+    "Extra helper function that uses the name and extra to setup headers"
+    (indent-for-tab-command)
+    (insert (format "; %s::name=     : %s\n" name function_name ) )
+    (indent-for-tab-command)
+    (insert (format "; %s::desc=     :\n" name ))
+    (indent-for-tab-command)
+    (insert (format "; %s::args=     :\n" name ))
+    (setq counter 1)
+    (indent-for-tab-command)
+    (insert (format "; %s::returns=  :\n" name ))
+    (indent-for-tab-command)
+    (insert (format "; %s::throws=   :\n" name ))
+    (indent-for-tab-command)
+    (insert (format "; %s::notes=    :\n" name ))
+    (indent-for-tab-command)
+    (insert (format ";              none\n"))
+    (indent-for-tab-command)
+    (insert (format "; %s::todo     :\n" name ))
+    (indent-for-tab-command)
+    (insert (format ";              none\n"))
+    (add-skill-top-banner)
+    (insert "\n")
+    )
+
+  (add-hook 'c-mode-common-hook 'display-line-numbers-mode)
+  ;(remove-hook 'c-mode-common-hook 'linum-mode)
+  (add-hook 'c-mode-common-hook 'outline-minor-mode ) 
+  (add-hook 'python-mode-hook 'display-line-numbers-mode)
+  ;(remove-hook 'python-mode-hook 'linum-mode)
+
+  (put 'upcase-region 'disabled nil)
+  (put 'downcase-region 'disabled nil)
+                                          ;(princ edit-tab-stops-map)
+  (defun bisque-background()
+    "Switches to bisque background for better vision"
+    (interactive) 
+    (set-background-color "bisque")
+    (custom-set-faces
+     '(hl-line ((t (:background "tan1"))))
+     '(font-lock-string-face ((t (:foreground "medium orchid"))))
+     )
+    )
+
+  (if (display-graphic-p) 
+      () 
+    (load-theme 'wheatgrass)
+    (xterm-mouse-mode)
+    )
+
+
+  (defun my-add-semantic-to-autocomplete()
+    (add-to-list 'ac-sources 'ac-source-semantic)
+    )
+
+  (add-hook 'c-mode-common-hook 'my-add-semantic-to-autocomplete)
+  (electric-indent-mode -1)
+
+(defun window-toggle-split-direction ()
+  "Switch window split from horizontally to vertically, or vice versa.
+
+i.e. change right window to bottom, or change bottom window to right."
+  (interactive)
+  (require 'windmove)
+  (let ((done))
+    (dolist (dirs '((right . down) (down . right)))
+      (unless done
+        (let* ((win (selected-window))
+               (nextdir (car dirs))
+               (neighbour-dir (cdr dirs))
+               (next-win (windmove-find-other-window nextdir win))
+               (neighbour1 (windmove-find-other-window neighbour-dir win))
+               (neighbour2 (if next-win (with-selected-window next-win
+                                          (windmove-find-other-window neighbour-dir next-win)))))
+          ;;(message "win: %s\nnext-win: %s\nneighbour1: %s\nneighbour2:%s" win next-win neighbour1 neighbour2)
+          (setq done (and (eq neighbour1 neighbour2)
+                          (not (eq (minibuffer-window) next-win))))
+          (if done
+              (let* ((other-buf (window-buffer next-win)))
+                (delete-window next-win)
+                (if (eq nextdir 'right)
+                    (split-window-vertically)
+                  (split-window-horizontally))
+                (set-window-buffer (windmove-find-other-window neighbour-dir) other-buf))))))))
+
+   (defalias 'rotate-window 'window-toggle-split-direction )
+  (setq org-format-latex-options (plist-put org-format-latex-options :scale 2.0))
+  (setq org-display-inline-images t) 
+  (setq org-redisplay-inline-images t) 
+  (setq org-startup-with-inline-images "inlineimages")
+
+
+                                          ;  (require 'calendar)
+
+
+
+  (setq epa-file-cache-passphrase-for-symmetric-encryption t )
+  (setq org-deadline-warning-days 14)
+  (use-package flycheck-ledger :after ledger-mode )
+
+    (setq org-return-follows-link t )
+    ;; (use-package org-jira)
+    ;; (setq jiralib-url "https://automodality.atlassian.net")
+
+  (defconst org-jira-progress-issue-flow
+  '(("To Do" . "In Progress")
+    ("In Progress" . "Ready to Test")
+    ("Ready To Test" . "Done")
+    ("Done" . "In Progress")))
+
+
+#+END_SRC 
+
+* Publishing and task management with Org-mode
+** Doct setup
+:PROPERTIES:
+:ID:       c15f9ff7-1cb2-4ee3-9f65-c1761a728e89
+:END:
+#+begin_src emacs-lisp
+(use-package doct
+  :ensure t
+  ;;recommended: defer until calling doct
+  :commands (doct))
+#+end_src
+** Org Setup
+*** Loading Org
+    :PROPERTIES:
+    :ID:       95c0226c-cd84-42c2-89cf-c0d3d8190ffc
+    :END:
+#+begin_src emacs-lisp
+  (use-package org
+    :ensure t
+    :pin gnu
+    )
+#+end_src
+
+*** Org Directory Setup
+    :PROPERTIES:
+    :ID:       d507ec22-cf8d-4edd-b1a3-adae9fdf1c31
+    :END:
+#+BEGIN_SRC emacs-lisp
+(setq org-directory "~/Dropbox/org/")
+(setq dropbox-directory "~/Dropbox/org/")
+(add-hook 'org-mode-hook 'outline-minor-mode)
+(add-hook 'org-mode-hook 'turn-on-auto-fill)
+(add-hook 'org-mode-hook 'turn-on-flyspell)
+(setq org-startup-indented t)
+
+#+END_SRC
+
+*** Scaling Preview Latex 
+    :PROPERTIES:
+    :ID:       d4d83f36-a933-44cd-b0cb-6c45c8532a2a
+    :END:
+#+BEGIN_SRC emacs-lisp
+  (set-default 'preview-scale-function 1.9 )
+#+END_SRC
+
+*** Don't indent by 2, instead use native indentation
+    :PROPERTIES:
+    :ID:       f3579ab0-15d6-4b9b-bdf0-8eb2a4f73604
+    :END:
+#+begin_src emacs-lisp
+(setq org-src-tab-acts-natively t )
+(setq org-src-fontify-natively t )
+(setq org-src-preserve-indentation t)
+(setq org-src-strip-leading-and-trailing-blank-lines t)
+#+end_src
+
+** Display preferences
+   :PROPERTIES:
+   :ID:       6e03889e-ef24-4bd6-b2d3-a46a58a8f55b
+   :END:
+
+I like to see an outline of pretty bullets instead of a list of asterisks.
+
+#+BEGIN_SRC emacs-lisp
+(use-package org-bullets
+  :init
+  (add-hook 'org-mode-hook 'org-bullets-mode))
+(setq org-bullets-bullet-list '("◉" "○" "✸"  "☯" "✿" "✜" "☯" "◆" "☯" "▶" ))
+
+#+END_SRC
+
+** Changing colors of Org 
+   :PROPERTIES:
+   :ID:       713afc43-5977-4b3f-8e95-16d5142204ff
+   :END:
+#+begin_src emacs-lisp
+;; (defun jmd/org-mode-hook ()
+;;   "My `org-mode' hook"
+;;   (set-face-attribute org-level-1 nil :foreground "light goldenrod"))
+;; (add-hook 'org-mode-hook 'jmd/org-mode-hook)
+#+end_src
+  Projects/org/contour.svg
+
+** I like using the windsize package
+   :PROPERTIES:
+   :ID:       ce82be38-790b-441c-82a8-2b8eb08301c8
+   :END:
+#+begin_src emacs-lisp
+(use-package windresize)
+#+end_src
+
+** Enforce TODO dependendices
+   :PROPERTIES:
+   :ID:       14d03d8d-2c54-4149-a16b-01cc16b23330
+   :END:
+#+begin_src emacs-lisp
+(setq org-enforce-todo-dependencies t)
+#+end_src
+
+** Nice looking Bullet symbols
+   :PROPERTIES:
+   :ID:       f7ed5509-680d-42c4-8269-2d8a6b87b8c2
+   :END:
+
+
+I borrowed this from Harry Schwartz as I too "like seeing a little
+downward-pointing arrow instead of the usual ellipsis (=...=) that org
+displays when there's stuff under a header."
+#+BEGIN_SRC emacs-lisp
+  (setq org-ellipsis "⤵")
+#+END_SRC 
+
+Make TAB act as if it were issued in a buffer of the language's major mode.
+
+#+BEGIN_SRC emacs-lisp
+  (setq org-src-tab-acts-natively t)
+#+END_SRC
+
+Hiding leading stars
+#+BEGIN_SRC emacs-lisp
+  (setq org-hide-leading-stars t)
+#+END_SRC
+
+** CDLaTeX mode
+   :PROPERTIES:
+   :ID:       6fd53e38-0adf-4036-988b-4abe2968d8ee
+   :END:
+
+   (use-package cdlatex)
+
+#+begin_src emacs-lisp
+  (use-package tex
+  :ensure auctex)
+  ;; (add-hook 'org-mode-hook 'turn-on-org-cdlatex)
+#+end_src
+
+** Org images
+   :PROPERTIES:
+   :ID:       c26906e1-9d24-4f62-86f2-343d2fc3b0a9
+   :END:
+
+
+   Allows us to scale the image sizes
+#+begin_src emacs-lisp
+(setq org-image-actual-width nil)
+#+end_src
+
+** Displaying LateX and other graphics inline
+   :PROPERTIES:
+   :ID:       4ab218f7-7eb4-4c36-a210-6a9f91d5f118
+   :END:
+
+   A hold over
+#+begin_src emacs-lisp
+  ;(add-hook 'org-babel-after-execute-hook 'org-redisplay-inline-images)
+#+end_src
+
+** Extra Org stuff
+** Org Inbox, Index and Archive location 
+   :PROPERTIES:
+   :ID:       229d2938-5bec-44b6-8a80-cf44300b3b6a
+   :END:
+ #+BEGIN_SRC emacs-lisp
+   (defun org-file-path (filename)
+     "Return the absolute address of an org file, given its relative name."
+     (concat (file-name-as-directory org-directory) filename))
+
+;(setq org-inbox-file "~/Dropbox/inbox.org")
+(setq org-inbox-file (append dropbox-directory "/inbox" ))
+   (setq org-index-file (org-file-path "index.org"))
+   (setq org-archive-location
+         (concat (org-file-path "archive.org") "::"))
+#+END_SRC
+
+** Archiving Org mode entries
+   :PROPERTIES:
+   :ID:       dbe95d01-c571-4fe2-ac05-7f836a11457b
+   :END:
+#+BEGIN_SRC emacs-lisp
+(defun jmd/personal-mark-done-and-archive ()
+  "Mark the state of an org-mode item as DONE and archive it."
+  (interactive)
+  (org-todo 'done)
+  (org-archive-subtree)
+  (setq foo (org-get-tags-string)))
+
+(defun jmd/mark-work-done-and-archive ()
+  "Mark the state of an org-mode item as DONE and archive it."
+  (interactive)
+  (org-todo 'done)
+  (org-toggle-tag "work" )
+  (org-archive-subtree)
+  ;; (setq foo (org-get-tags-string))
+  )
+
+; Save the file
+; 
+(add-hook 'org-agenda-mode-hook
+          (lambda ()
+            (add-hook 'auto-save-hook 'org-save-all-org-buffers nil t)
+            (auto-save-mode)))
+
+
+(defun my/org-checkbox-todo ()
+  "Switch header TODO state to DONE when all checkboxes are ticked, to TODO otherwise"
+  (let ((todo-state (org-get-todo-state)) beg end)
+    (unless (not todo-state)
+      (save-excursion
+        (org-back-to-heading t)
+        (setq beg (point))
+        (end-of-line)
+        (setq end (point))
+        (goto-char beg)
+        (if (re-search-forward "\\[\\([0-9]*%\\)\\]\\|\\[\\([0-9]*\\)/\\([0-9]*\\)\\]"
+                               end t)
+            (if (match-end 1)
+                (if (equal (match-string 1) "100%")
+                    (unless (string-equal todo-state "DONE")
+                      (org-todo 'done))
+                  (unless (string-equal todo-state "TODO")
+                    (org-todo 'todo)))
+              (if (and (> (match-end 2) (match-beginning 2))
+                       (equal (match-string 2) (match-string 3)))
+                  (unless (string-equal todo-state "DONE")
+                    (org-todo 'done))
+                (unless (string-equal todo-state "TODO")
+                  (org-todo 'todo)))))))))
+
+(add-hook 'org-checkbox-statistics-hook 'my/org-checkbox-todo)
+(define-key org-mode-map (kbd "C-c C-x C-s") 'jmd/mark-done-and-archive)
+
+#+END_SRC
+
+#+RESULTS:
+: jmd/mark-done-and-archive
+
+** Exporting code
+   :PROPERTIES:
+   :ID:       67909117-604a-43b0-8d66-24096a099920
+   :END:
+#+begin_src emacs-lisp
+(setq org-confirm-babel-evaluate nil)
+#+end_src
+
+** Rest of ORG
+   :PROPERTIES:
+   :ID:       27a854f7-3c03-4311-a534-d353d5359606
+   :END:
+
+#+BEGIN_SRC emacs-lisp
+(setq org-src-fontify-natively t )
+(setq org-src-tab-acts-natively t )
+(setq org-src-window-setup 'current-window )
+(setq org-clock-persist 'history)
+(setq org-log-done t)
+(setq org-log-into-drawer t)
+(setq org-tags-column 80)
+
+(setq jd-org-directory (file-name-as-directory "~/Dropbox/org" ))                                                                                     
+;; (setq jd-journal-directory (file-name-as-directory (concat jd-org-directory "Roam/daily" )))                                                           
+                                        ;(setq jd-journal-directory (file-name-as-directory (concat jd-org-directory "journal.org" )))                                                           
+(setq jd-journal-directory (file-name-as-directory jd-org-directory))
+(setq jd-journal-format "%Y-%m.org" )                                                                                                                  
+(setq jd-journal-date-format "%Y-%m-%d %A")                                                                                                            
+
+(setq jd-current-work-project "" )                                                                                                                     
+
+(defun jd/current-work-project())
+
+
+(defun jd/journal-date-path ()
+  "Get file path for daily journal."
+  (expand-file-name
+   (concat ;; "journal-"
+    (format-time-string "%Y-%m") ".org")
+   jd-journal-directory))
+;; (jd/journal-date-path)
+
+
+
+(defun jd/find-create-date-entry ()
+  "Append to end of or create Org entry with date heading."
+  (let ((heading (concat "* " (format-time-string "%Y-%m-%d %A"))))
+    (save-match-data
+      (goto-char (point-min))
+      (unless (re-search-forward heading nil 'no-error)
+        (end-of-line)
+        (newline)
+        (insert heading))
+      (org-end-of-subtree))))
+
+;; @todo FIX this journal to use the org-journal
+;;       but that requires fixing the function org-journal-find-location which is annoying 
+;;       because it pops up two editor windows, one from the function itself and another
+;;       from the org-capture.
+
+(defcustom my-org-personal-capture-filename nil                                                                                                        
+  "Non-nil means automatically use as personal capture filename"                                                                                       
+  :type '(string)                                                                                                                                      
+  :group 'myorg                                                                                                                                        
+  )                                                                                                                                                    
+
+(defcustom my-org-work-capture-filename nil                                                                                                            
+  "Non-nil means automatically use as personal capture filename"                                                                                       
+  :type '(string)                                                                                                                                      
+  :group 'myorg                                                                                                                                        
+  )                                                                                                                                                    
+
+(defvar my-org-work-capture-filename nil                                                                                                               
+  "File name for org work capture template.")                                                                                                          
+
+(defun my-org-personal-capture ()                                                                                                                      
+  "Read file name to capture to."                                                                                                                      
+  (interactive)                                                                                                                                        
+  (setq my-org-personal-capture-filename                                                                                                               
+        (read-file-name "Capture to: " "~/Dropbox/personal"  nil t "inbox.org")))                                                                     
+
+(defun my-org-work-capture ()
+  "Read file name to capture to."
+  (interactive)
+  (setq my-org-work-capture-filename
+        (read-file-name "Capture to: " "~/Dropbox/org" nil t "workjournal.org")))
+
+;; jd/journal-date-path
+(setq org-capture-templates                                                                                                                            
+      '(("t" "Todo" entry (file+headline "~/Dropbox/org/inbox.org" "Tasks")  "* TODO %?\n%i\n   %a")
+        ("j" "Journal" plain (file+function "~/Dropbox/org/journal.org" jd/find-create-date-entry ) "** %?\n" )
+        ("W" "Work Journal" plain (file+function "~/Dropbox/org/workjournal.org" jd/find-create-date-entry ) "** %?\t\t:@work:\n    %i\n%a" )
+        ("S" "Someday Task" entry (file+headline "~/Dropbox/org/someday.org" "Tasks")
+         "* %?\t\t:question:\n    :PROPERTIES:\n    :MODIFIED: %U\n    :END:\n")
+        ("c" "Current Journal" entry (file+function my-org-personal-capture-filename jd/find-create-date-entry )                                       
+         "** %?\t\t:work:\n" )                                                                                                                         
+        ("q" "Questions" plain (file+function "~/Dropbox/org/questions.org" jd/find-create-date-entry) "** %?\t\t:question:\n    :PROPERTIES:\n    :MODIFIED: %U\n    :END:\n" )
+        ))
+
+(setq org-journal-file-format "%Y%m%d.org")
+(setq org-hide-emphasis-markers t )
+(use-package ob-kotlin)
+
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '((python . t)
+   (ledger . t)
+   (latex . t)
+   (ditaa . t)
+   (shell . t)
+   (dot . t)
+   (ruby . t)
+   (octave . t)
+   ;; (scala . t)
+   (kotlin . t)
+   (maxima . t )
+   ))
+;;
+
+(defun org-journal-save-entry-and-exit()
+  "Simple convenience function.
+    Saves the buffer of the current day's entry and kills the window
+    Similar to org-capture like behavior"
+  (interactive)
+  (save-buffer)
+  (kill-buffer-and-window))
+
+;;----------------------------------------------------------------------
+;; OS specific
+
+(cond
+ ((string-equal system-type "windows-nt") ; Microsoft Windows
+
+  (progn
+    (setq-default ispell-program-name "C:/bin/Aspell/bin/aspell.exe") 
+    (setq org-ditaa-jar-path "c:/bin/ditaa/ditaa.jar")
+    )
+  )
+ ((string-equal system-type "gnu/linux") ; Linux
+  (progn
+    (setq x-select-enable-clipboard t)
+    (setq org-ditaa-jar-path "/usr/bin/ditaa")
+    )
+  )
+ )
+
+
+                                        ;(ledger . t)
+                                        ; Use this to save my location in files when i reopen them
+(save-place-mode t)
+
+(org-clock-persistence-insinuate)
+(defun org-archive-done-tasks ()
+  (interactive)
+  (org-map-entries
+   (lambda ()
+     (org-archive-subtree)
+     (setq org-map-continue-from (outline-previous-heading)))
+   "/DONE" 'tree))
+(global-set-key "\C-cl" 'org-store-link)
+(global-set-key "\C-ca" 'org-agenda)
+(global-set-key "\C-cc" 'org-capture)
+(global-set-key "\C-cb" 'org-switchb)
+(defun org-agenda-skip-deadline-if-not-thisweek ()
+  "If this function returns nil, the current match should not be skipped.
+    Otherwise, the function must return a position from where the search
+    should be continued."
+  (ignore-errors
+    (let ((subtree-end (save-excursion (org-end-of-subtree t)))
+	  (deadline-day
+	   (time-to-days
+	    (org-time-string-to-time
+	     (org-entry-get nil "DEADLINE"))))
+	  (now (time-to-days (current-time))))
+      (and deadline-day
+	   (not (= deadline-day now))
+	   subtree-end))))
+(setq org-agenda-start-with-log-mode '(closed clock state))
+(setq org-agenda-log-mode-items '(closed clock state))
+
+(defun my-org-agenda-skip-all-siblings-but-first ()
+  "Skip all but the first non-done entry."
+  (let (should-skip-entry)
+    (unless (org-current-is-todo)
+      (setq should-skip-entry nil))
+    (save-excursion
+      (while (and (not should-skip-entry) (org-goto-sibling t))
+	(when (org-current-is-todo)
+	  (setq should-skip-entry t))))
+    (when should-skip-entry
+      (or (outline-next-heading)
+	  (goto-char (point-max))))))
+
+(defun org-current-is-todo ()
+  (string= "TODO" (org-get-todo-state)))
+ #+END_SRC
+
+** Org Agenda
+
+#+begin_src emacs-lisp
+(use-package org-super-agenda
+  :config 
+  (org-super-agenda-mode)
+  )
+
+(setq today-plus-7days (org-read-date nil nil "+1"))
+
+(setq org-agenda-files (append (list 
+                                (concat dropbox-directory "workjournal.org")
+                                (concat dropbox-directory "journal.org")
+                                (concat dropbox-directory "tickler.org")
+                                (concat dropbox-directory "gtd.org")
+                                (concat dropbox-directory "archive.org")
+                                (concat dropbox-directory "inbox.org")
+                                )
+                               ))
+
+(setq org-agenda-custom-commands
+      `(("c" "Simple agenda view"
+	 ((agenda "")
+	  (alltodo "")))
+	("h" "Work Things"
+	 ((agenda "" ((org-agenda-ndays 1)
+		      (org-agenda-sorting-strategy
+		       (quote ((agenda time-up priority-down tag-up))))
+		      (org-deadline-warning-days 0)))
+	  ))
+	("w" "Work tasks" tags-todo "@work"
+	 ((org-agenda-overriding-header "Work")
+	  (org-agenda-skip-function #'my-org-agenda-skip-all-siblings-but-first)))
+	("W" "Weely review"
+	 ((agenda ""
+		  ((org-agenda-span 'week)
+		   (org-agenda-start-on-weekday 0)
+		   (org-agenda-start-with-log-mode '(closed clock state))
+		   ;; (org-agenda-skip-function
+		   ;;  '(org-agenda-skip-entry-if 'nottodo 'done))
+		   ))
+	  ))
+        ("z" "Zen Super view"
+         ((agenda "" ((org-agenda-span 'day)
+                      (org-super-agenda-groups
+                       '((:name "Today"
+                                :time-grid t  ; Items that appear on the time grid
+                                :todo "TODAY"
+                                :order 1 
+                                )
+                         (:name "Due Today"
+                                :deadline today
+                                :order 2)
+                         (:name "Due Soon"
+                                :deadline  (before ,(org-read-date nil nil "+10" ))
+                                :order 3 
+                                )
+                         ;; (:name "Scheduled soon"
+                         ;;        :scheduled (before ,(format "%s" "2022-12-01"))
+                         ;;        )
+                                
+                         ;; (:name "FOO" 
+                         ;;        :deadline (before "2022-11-19"))
+                         ;; (:discard (:deadline (after "2022-11-20")))
+                         ;; ;; (:discard `(:deadline (after ,(org-read-date nil nil "+0" ))))
+                         ;; (:name "Due Soon"
+                         ;;        :deadline (before "2022-11-18")
+                         ;;        :order 3
+                         ;;        )
+                         ;;        ;; :deadline `(before ,(org-read-date nil nil "+10"))
+                         (:habit t 
+                                 :order 4)
+                         (:name "Start Today"
+                                :scheduled today
+                                :order 5
+                                )
+                         
+                         )))); agenda
+
+          (alltodo "" ((org-agenda-overriding-header "")
+                       (org-super-agenda-groups
+                        '(
+                          (:name "Inbox"
+                                 :order 6
+                                 :file-path "inbox"
+                                 )
+                          (:name "Waiting"
+                                :todo "WAITING"
+                                )
+                          ;; (:name "Next to do"
+                          ;;        :order 6
+                          ;;        :deadline nil
+                          ;;        :and (:todo "NEXT"))
+                          (:discard (:todo "TODO"))
+                          (:discard (:category "tickler"))
+                          (:discard (:tag "call"))
+                          (:auto-category t :order 9)
+                          (:name "Next Steps"
+                                 :and (:todo "NEXT"))
+
+                          ;; (:discard (:anything))
+                          )))); alltodo
+          )
+         )
+        ("o"  "Office stuff" tags-todo "@work" 
+         ((org-agenda-overriding-header "Work")
+          (org-agenda-skip-function #'my-org-agenda-skip-all-siblings-but-first)))
+        )); org-agenda-custom-commands
+                                ;; :deadline (before "2022-11-20")
+                                ;; :deadline (before '(org-read-date nil nil "+1"))
+
+(defun jmd-org-tasks-closed-in-month (&optional month year match-string)
+  "Produces an org agenda tags view list of the tasks completed 
+    in the specified month and year. Month parameter expects a number 
+    from 1 to 12. Year parameter expects a four digit number. Defaults 
+    to the current month when arguments are not provided. Additional search
+    criteria can be provided via the optional match-string argument "
+  (interactive)
+  (let* ((today (calendar-current-date))
+	 (for-month (or month (calendar-extract-month today)))
+	 (for-year  (or year  (calendar-extract-year today))))
+    (org-tags-view nil 
+		   (concat
+		    match-string
+		    (format "+CLOSED>=\"[%d-%02d-01]\"" 
+			    for-year for-month)
+		    (format "+CLOSED<=\"[%d-%02d-%02d]\"" 
+			    for-year for-month 
+			    (calendar-last-day-of-month for-month for-year))))))
+
+(defun jmd-org-tasks-query-for-month (&optional month year)
+  (interactive)
+  (let* ((today (calendar-current-date))
+	 (for-month (or month (calendar-extract-month today)))
+	 (for-year  (or year  (calendar-extract-year today))))
+    (concat
+     (format "+CLOSED>=\"[%d-%02d-01]\"" for-year for-month)
+     (format "+CLOSED<=\"[%d-%02d-%02d]\"" for-year for-month  (calendar-last-day-of-month for-month for-year)))
+    ))
+
+(defun jmd-work-tasks-last-month ()
+  "Produces an org agenda tags view list of all the tasks completed
+    last month with for work "
+  (interactive)
+  (let* ((today (calendar-current-date))
+	 (for-month (calendar-extract-month today))
+	 (for-year  (calendar-extract-year today)))
+    (calendar-increment-month for-month for-year -1)
+    (org-tags-view nil (concat "TODO=\"DONE\"" 
+			       (jmd-org-tasks-query-for-month for-month for-year) 
+			       "|ARCHIVE_ITAGS=\"work\""
+			       (jmd-org-tasks-query-for-month for-month for-year)))))
+
+;; (define-key org-journal-mode-map (kbd "C-x C-s") 'org-journal-save-entry-and-exit)
+ #+END_SRC
+
+ #+RESULTS:
+ : jmd-work-tasks-last-month
+
+** Org Download
+   :PROPERTIES:
+   :ID:       9568b3af-6ec8-4642-86e7-47720f17796d
+   :END:
+#+BEGIN_SRC emacs-lisp
+  ;; (require 'org-download)
+  (use-package org-download)
+  ;; Drag-and-drop to `dired`
+  (add-hook 'dired-mode-hook 'org-download-enable)
+  (add-hook 'org-mode 'org-download-enable)
+  (setq-default org-download-image-dir "~/Dropbox/org/Pictures/")
+  ;; (use-package org-download
+  ;;   :ensure t
+  ;;   :config
+  ;;   ;; add support to dired
+  ;;   (add-hook 'dired-mode-hook 'org-download-enable))
+
+#+END_SRC
+** Org Exporting 
+   :PROPERTIES:
+   :ID:       9faf29ae-c5a1-49cb-bfdf-056d38d6e423
+   :END:
+#+begin_src emacs-lisp
+(setq org-export-coding-system 'utf-8)
+#+end_src
+** Org quizzing
+   :PROPERTIES:
+   :ID:       6d116f43-d8f2-4bfa-bf13-9774432b295e
+   :END:
+#+BEGIN_SRC emacs-lisp
+;  (setq org-drill-add-random-noise-to-intervals-p t )
+;  (setq org-drill-learn-fraction 0.1)
+#+END_SRC
+** Org Journaling
+   :PROPERTIES:
+   :ID:       0267f313-bf28-4f9d-af19-9fa6784513a9
+   :END:
+
+#+begin_src emacs-lisp
+;; (use-package org-journal
+;;   :ensure t
+;;   :defer t
+;;   :bind (("C-c t" . journal-file-today)
+;;          ("C-c y" . journal-file-yesterday))
+;;   :custom
+;;   (org-journal-dir jd-journal-directory)
+;;   (org-journal-file-type "weekly")
+;;   (org-journal-date-format jd-journal-date-format)
+;;   (org-journal-time-format "%H:%M ")
+;;   (org-journal-enable-agenda-integration t)
+;;   :preface
+;;   (defalias 'journal-file-today 'org-journal-new-entry)
+;;   (defun journal-file-yesterday ()
+;;     "Creates and load a file based on yesterday's date."
+;;     (interactive)
+;;     (find-file (get-journal-file-yesterday)))
+;;   :config
+;;   ;; in case you want .gpg preserved files
+;;   ;;(setq org-agenda-file-regexp "\\`\\\([^.].*\\.org\\\|[0-9]\\\{8\\\}\\\(\\.gpg\\\)?\\\)\\'")
+;;   (add-to-list 'org-agenda-files jd-journal-directory)
+;;   (org-journal-update-auto-mode-alist)
+;;   )
+;; (jmd/find-good-org-files fname)
+;; (setq fname "todo/Receipts/receipts.org")
+;; (setq fname "todo/Receipts/receipts.org.skip")
+(defun jmd/find-good-org-files ( fname)
+  "Creates and load a file based on yesterday's date."
+  (interactive)
+  (if (string-match ".*\\.org\\.skip" fname )
+      (progn                              ; true
+        nil
+        )
+    (progn                           ;False
+      t
+      )
+    )
+  )
+#+end_src
+** Org Roam
+   :PROPERTIES:
+   :ID:       88f88606-be20-4201-b4ca-7d7bda997dd5
+   :END:
+#+begin_src emacs-lisp
+  (use-package org-roam
+    :ensure t
+    :init 
+    (setq org-roam-v2-ack t)
+    :custom 
+    (org-roam-directory "~/Dropbox/org/Roam/")
+    (org-roam-completion-everywhere t)
+    :custom-face
+    (org-roam-link ((t (:inherit org-link :foreground "#C991E1"))))
+
+    :bind (("C-c n l" . org-roam-buffer-toggle)
+           ("C-c n f" . org-roam-node-find)
+           ("C-c n i" . org-roam-node-insert)
+           ("C-c n g" . org-roam-show-graph)
+           ("C-c n I" . org-roam-node-insert-immediate)
+           ("C-c n b" . org-roam-switch-to-buffer)
+           :map org-mode-map
+           ("C-M-i"   . completion-at-point))
+    :config 
+    (org-roam-db-autosync-mode)
+    (defun jimi_damon/conditional-hugo-enable ()
+      (save-excursion
+        (if (cdr (assoc "SETUPFILE" (org-roam--extract-global-props '("SETUPFILE"))))
+            (org-hugo-auto-export-mode +1)
+          (org-hugo-auto-export-mode -1))))
+    
+    (with-eval-after-load 'org
+      (defun my/org-roam--backlinks-list (file)
+        (if (org-roam--org-roam-file-p file)
+            (--reduce-from
+             (concat acc (format "- [[file:%s][%s]]\n"
+                                 (file-relative-name (car it) org-roam-directory)
+                                 (org-roam--get-title-or-slug (car it))))
+             "" (org-roam-sql [:select [file-from]
+                                       :from file-links
+                                       :where (= file-to $s1)
+                                       :and file-from :not :like $s2] file "%private%"))
+          ""))
+      (defun my/org-export-preprocessor (_backend)
+      (let ((links (my/org-roam--backlinks-list (buffer-file-name))))
+        (unless (string= links "")
+          (save-excursion
+            (goto-char (point-max))
+            (insert (concat "\n* Backlinks\n" links))))))
+      (add-hook 'org-export-before-processing-hook 'my/org-export-preprocessor))
+    (setq org-roam-capture-templates
+        '(("d" "default" plain "%?"
+           ;(file+head "path/to/file" "head content")
+      ;; (file+head "path/to/file" "head content")
+           :target (file+head "${slug}.org" "#+SETUPFILE:./hugo_setup.org
+#+HUGO_SECTION: zettels
+#+TITLE: ${title}\n" )
+;; :head "#+SETUPFILE:./hugo_setup.org
+;; #+HUGO_SECTION: zettels
+;; #+HUGO_SLUG: ${slug}
+;; #+TITLE: ${title}\n"
+           :unnarrowed t
+           )
+          ;; ("p" "private" plain (function org-roam--capture-get-point)
+          ;;  "%?"
+          ;;  :target 
+          ;;  ;; :file-name "private-${slug}"
+          ;;  :head "#+TITLE: ${title}\n"
+          ;;  :unnarrowed t)
+          ))
+  (setq org-roam-ref-capture-templates
+        '(("r" "ref" plain (function org-roam--capture-get-point)
+           "%?"
+           :file-name "websites/${slug}"
+           :head "#+SETUPFILE:./hugo_setup.org
+,#+ROAM_KEY: ${ref}
+,#+HUGO_SLUG: ${slug}
+,#+TITLE: ${title}
+
+- source :: ${ref}"
+           :unnarrowed t))))
+
+    ;; (org-roam-setup)
+#+end_src
+*** Insert nodes immediately without switching buffers
+:PROPERTIES:
+:ID:       550f0ee4-5567-4253-8242-0b1c43365fb9
+:END:
+#+begin_src emacs-lisp
+(defun org-roam-node-insert-immediate (arg &rest args)
+  (interactive "P")
+  (let ((args (push arg args))
+        (org-roam-capture-templates (list (append (car org-roam-capture-templates)
+                                                  '(:immediate-finish t)))))
+    (apply #'org-roam-node-insert args)))
+
+;; (defun org-roam-node-insert-immediate (arg &rest args)
+;;   (interactive "P")
+;;   (let ((args (cons arg args))
+;;         (org-roam-capture-templates (list (append (car org-roam-capture-templates)
+;;                                                   '(:immediate-finish)))))
+;;                                           (apply #'org-roam-node-insert args)))
+#+end_src
+** Org ROAM bibtex
+:PROPERTIES:
+:ID:       ffb9c8da-91fd-4506-ba99-40dc61e2dda0
+:END:
+
+#+begin_src emacs-lisp
+(use-package org-ref)
+
+
+(use-package org-roam-bibtex
+  :after (org-roam org-ref)
+  :load-path "~/Dropbox/org/Roam/"
+  :hook (org-roam-mode . org-roam-bibtex-mode)
+  :config
+  (require 'org-ref))
+
+(setq orb-note-actions-interface 'helm)
+(setq orb-preformat-keywords   '(("citekey" . "=key=") "note" "title" "url" "file" "author-or-editor" "keywords"))
+(setq orb-templates
+      '(("r" "ref" plain #'org-roam-capture--get-point ""
+          %^{note}
+         :file-name "${citekey}"
+         :head "#+TITLE: ${title}\n#+ROAM_KEY: ${ref}\n"
+         :unnarrowed t)))
+
+#+end_src
+
+
+*** Zotero setup
+:PROPERTIES:
+:CAPTURED: <2022-03-17 02:53>
+:ANKI_NOTE_ID: 1647511009260
+:END:
+
+1. Zotero is setup to use ~/Zotero
+2. This is a symlink to Dropbox/Zotero
+3. syncing is enabled that allows the bibliography to be synced to the
+   cloud
+4. Exporting will export a .bib file into ~/Dropbox/org/Roam/
+
+*** Bibtex configuration
+:PROPERTIES:
+:ID:       5b2dee9a-8d75-403d-ac7a-14936263067a
+:END:
+#+begin_src emacs-lisp
+    (setq reftex-default-bibliography '("~/Dropbox/org/Zettelkasten/ref.bib"))
+
+    (setq org-ref-bibliography-notes "~/Dropbox/org/ref_notes.org"
+          org-ref-default-bibliography '("~/Dropbox/org/Zettelkasten/ref.bib")
+          org-ref-pdf-directory "~/bibtex-pdfs/")
+
+    (setq bibtex-completion-bibliography "~/Dropbox/org/Zettelkasten/ref.bib"
+          bibtex-completion-library-path "~/Dropbox/org/bibtex-pdfs"
+          bibtex-completion-notes-path "~/Dropbox/org/bibtex-notes")
+
+    ; Optional. Open pdf in external viewer.
+    (setq bibtex-completion-pdf-open-function
+          (lambda (fpath)
+            (start-process "open" "*open*" "open" fpath)))
+#+end_src
+
+** Org Roam UI
+#+begin_src emacs-lisp
+(use-package websocket
+    :after org-roam)
+
+(use-package org-roam-ui
+    :after org-roam ;; or :after org
+;;         normally we'd recommend hooking orui after org-roam, but since org-roam does not have
+;;         a hookable mode anymore, you're advised to pick something yourself
+;;         if you don't care about startup time, use
+;;  :hook (after-init . org-roam-ui-mode)
+    :config
+    (setq org-roam-ui-sync-theme t
+          org-roam-ui-follow t
+          org-roam-ui-update-on-save t
+          org-roam-ui-open-on-start t))
+#+end_src
+
+** Helm Bibtex
+#+begin_src emacs-lisp
+(use-package helm-bibtex 
+  :bind (("C-c n b" . helm-bibtex))
+  )
+
+
+
+(autoload 'helm-bibtex "helm-bibtex" "" t)
+(setq bibtex-completion-bibliography
+      '("~/Dropbox/org/Zettelkasten/Zettelkasten.bib"))
+#+end_src
+
+** Citar
+#+begin_src emacs-lisp
+;; (use-package citar
+;;   :bind (("C-c b" . citar-insert-citation)
+;;          :map minibuffer-local-map
+;;          ("M-b" . citar-insert-preset))
+;;   :custom
+;;   (citar-bibliography '("~/Dropbox/org/Zettelkasten/Zettelkasten.bib")))
+
+(use-package citar-embark
+  :after citar embark
+  :no-require
+  :config (citar-embark-mode))
+
+#+end_src
+** Org Dailies with Org Roam
+:PROPERTIES:
+:ID:       df395930-9949-4d39-bd85-885dbbdcca05
+:END:
+#+begin_src emacs-lisp
+;; (setq org-roam-dailies-directory "/home/jdamon/Dropbox/org/Roam/daily")
+;; (setq org-roam-dailies-capture-templates
+;;       '(("d" "default" entry
+;;          "* %?"
+;;          :if-new (file+head "%<%Y-%m-%d>.org"
+;;                             "#+title: %<%Y-%m-%d>\n")
+;;          :target (file+head "%<%Y-%m-%d>.org"
+;;                             "#+title: %<%Y-%m-%d>\n"))))
+#+end_src
+
+** Org Chef
+   :PROPERTIES:
+   :ID:       9075171f-bf8f-435e-9adb-79185736bcc8
+   :END:
+
+*** Loading things
+    :PROPERTIES:
+    :ID:       502db2b1-26a0-4de6-b44a-397321233e83
+    :END:
+    #+begin_src emacs-lisp
+    (use-package org-chef
+      :ensure t 
+    )
+    #+end_src
+
+** Org Modifying and Created tags
+   :PROPERTIES:
+   :ID:       332eba19-0f65-4da6-9358-f38fc5719d87
+   :END:
+   
+   Allow the user to mark a property that indicates we should update this 
+   property's modified tag and hash
+
+  #+begin_src emacs-lisp
+   (defun jmd/getentryhash ()
+     "Get the hash sum of the text in current entry, except :HASH: and :MODIFIED: property texts."
+     (save-excursion
+       (let* ((beg (progn (org-back-to-heading) (point)))
+          (end (progn
+             (forward-char)          
+             (if (not (re-search-forward "^\*+ " (point-max) t))
+                 (point-max)
+               (match-beginning 0))))
+          (full-str (buffer-substring beg end))
+          (str-nohash (if (string-match "^ *:HASH:.+\n" full-str)
+                  (replace-match "" nil nil full-str)
+                full-str))
+          (str-nohash-nomod (if (string-match "^ *:MODIFIED:.+\n" str-nohash)
+                    (replace-match "" nil nil str-nohash)
+                      str-nohash))
+          (str-nohash-nomod-nopropbeg (if (string-match "^ *:PROPERTIES:\n" str-nohash-nomod)
+                          (replace-match "" nil nil str-nohash-nomod)
+                        str-nohash-nomod))
+          (str-nohash-nomod-nopropbeg-end (if (string-match "^ *:END:\n" str-nohash-nomod-nopropbeg)
+                              (replace-match "" nil nil str-nohash-nomod-nopropbeg)
+                            str-nohash-nomod-nopropbeg)))
+         ;(sxhash str-nohash-nomod-nopropbeg-end)
+         (secure-hash 'md5 str-nohash-nomod-nopropbeg-end)
+         )))
+   
+   (defun jmd/update-modification-time ()
+     "Set the :MODIFIED: property of the current entry to NOW and update :HASH: property."
+      (interactive)
+     (org-set-property "HASH" (format "%s" (jmd/getentryhash)))    
+     (org-set-property "MODIFIED" (format-time-string "[%Y-%m-%d %H:%M]")))
+   (defun jmd/skip-nonmodified ()
+     "Skip org entries, which were not modified according to the :HASH: property"
+     (interactive)
+     (let ((next-headline (save-excursion (or (outline-next-heading) (point-max)))))
+       (if (string= (org-entry-get (point) "HASH" nil) (format "%s" (jmd/getentryhash)))
+       next-headline
+         nil)))
+   
+   ;;   (add-hook 'before-save-hook (lambda ()
+   ;;                  (when (eq major-mode 'org-mode)
+   ;;                (org-map-entries #'jmd/update-modification-time nil 'file #'jmd/skip-nonmodified))))  
+  #+end_src
+
+** Adding CREATED to new captures
+   :PROPERTIES:
+   :ID:       3c7067eb-4002-4333-bf78-8792e2ac6f70
+   :END:
+   #+begin_src emacs-lisp
+   (defun add-property-with-date-captured ()
+     "Add DATE_CAPTURED property to the current item."
+     (interactive)
+     (org-set-property "CAPTURED" (format-time-string "<%Y-%m-%d %H:%M>")))
+   
+   (add-hook 'org-capture-before-finalize-hook 'add-property-with-date-captured)
+
+   (defun update-capture () 
+     (interactive)
+     (org-set-property "CAPTURED" (format-time-string "<%Y-%m-%d %H:%M>")))
+  
+
+   (defalias  'add-timestamp 'update-cature)
+
+
+   #+end_src
+   
+** Deft
+   :PROPERTIES:
+   :ID:       7f20e36b-a779-4791-b964-76623fbd086b
+   :END:
+   
+#+begin_src emacs-lisp
+  (use-package deft
+    :bind ("<f8>" . deft)
+    :commands (deft)
+    :config (setq deft-directory "~/Dropbox/org"
+                  deft-extensions '("md" "org")))
+  (global-set-key (kbd "C-c d") 'deft)
+  (setq deft-extensions '("org"))
+  (setq deft-text-mode 'org-mode) 
+  (setq deft-use-filename-as-title t )
+  (setq deft-recursive t)
+#+end_src 
+** Org sorting
+
+Need o spend some time on this stuff here
+   :PROPERTIES:
+   :ID:       fc34dd6f-372c-4c01-9e55-7c85254e9493
+   :END:
+
+#+begin_src emacs-lisp
+(setq org-agenda-todo-ignore-scheduled nil)
+(setq org-agenda-todo-ignore-deadlines nil)
+(setq org-default-priority ?C)
+#+end_src
+
+** COMMENT Org limiting Agenda views
+   :PROPERTIES:
+   :ID:       aeba792b-02be-45c4-97e1-fce803fca70b
+   :END:
+Not needed any more
+#+begin_src emacs-lisp
+;; (setq org-agenda-todo-ignore-scheduled 'future)
+;; (setq org-agenda-todo-ignore-deadlines 'future)
+;; (setq org-agenda-tags-todo-honor-ignore-options t)
+#+end_src
+** COMMENT Org Agenda hide blocked TODOS
+   :PROPERTIES:
+   :ID:       27c8e2a0-3577-49c5-a55b-f87986cf4b8a
+   :END:
+#+begin_src emacs-lisp
+;; This will hide blocked tasks in agenda
+;(setq org-agenda-dim-blocked-tasks 'invisible)
+;; This will show blocked tasks in agena
+;; (setq org-agenda-dim-blocked-tasks nil)
+#+end_src
+
+** Org Hugo integration
+   :PROPERTIES:
+   :ID:       cffb64ed-4493-44cf-949f-d40d75a784c6
+   :END:
+
+For exporting 
+#+begin_src emacs-lisp
+(use-package ox-hugo
+  :ensure t   ;Auto-install the package from Melpa
+  :pin melpa  ;`package-archives' should already have ("melpa" . "https://melpa.org/packages/")
+  :after ox)
+#+end_src
+
+** Common Emacs Commands/Stuff and mneumonics
+*** Insert time stamps that can be see by Org Agenda
+    C-u C-u C-c .
+    
+*** Hidden timestamps
+    
+    C-u C-c !
+
+*** Changing the state (when you can't use fast keys)
+
+    C-C C-t
+
+*** Changing the sort orders
+    customize-variable org-tags-match-list-sublevels
+
+    Set the value to list them with dots
+
+*** Custom Queries
+    
+    Select effort less than 1 hour and PRIORITY <=B 
+
+    Effort<1+PRIORITY<="B"-archive+chores
+
+*** Changing effort
+
+    C-c C-x e (org-set-effort)
+
+    C-c C-x C-e (org-clock-modify-effort-estimate)
+
+*** Show subtrees ( or only children )
+
+    customize-variable
+    org-agenda-todo-list-sublevels
+    org-tags-match-list-sublevels
+    
+    Then re-run your query
+
+*** Create a new frame
+    (make-frame-command)
+
+*** Track changes in the code (change buffer when the files changes underneath)
+:PROPERTIES:
+:ID:       a721095c-926c-4a8f-ac65-6ff4ab9e3067
+:END:
+     (global-auto-revert-mode t )
+     (setq auto-revert-use-notify nil)
+
+     in your .emacs.
+     
+     Other option is to customize global-auto-revert-mode and toggle it to on
+
+*** How to insert Latex blocks inside of org mode                               :latex:insert:environment:
+    
+    [[https://orgmode.org/manual/CDLaTeX-mode.html][Mode is CDLatex mode]]
+    
+    C-c { 
+**** Preview a fragment
+     
+     C-c C-x C-l 
+**** Insert citation using RefTex
+
+     C-c C-x [
+*** How to View ansi colors in Emacs                                            :view:ansi:color:
+    :PROPERTIES:
+    :ID:       dfb174cb-c975-4bbe-b401-c46112a13fe9
+    :END:
+    #+begin_src emacs-lisp
+    (require 'ansi-color)
+    (defun display-ansi-colors ()
+      (interactive)
+      (ansi-color-apply-on-region (point-min) (point-max)))
+    #+end_src
+
+    display-ansi-colors
+**** Ref    
+     - https://stackoverflow.com/questions/23378271/how-do-i-display-ansi-color-codes-in-emacs-for-any-mode
+
+*** Toggling Viewing images                                                     :view:images:
+    C-c C-x C-v
+*** Viewing Latex math                                                          :view:latex:math:
+    C-c C-x C-l
+*** Showing tasks in a buffer
+    C-c / t   : will list sparse tree of outstanding todo items
+
+*** Adding Images to org
+**** From Clipboard
+     org-download-clipboard
+
+**** From a WebSite without download
+     
+     - Right click -> Copy image address
+     - org-download-image
+     - paste your link
+
+**** Drag and Drop
+
+     - Works only from firefox and ONLY on specific pages
+     - Maybe disable javascript
+     - Drag into org document
+
+*** Ignoring comments
+    Really cool feature where you can hide whole sections of comments
+
+    - https://www.emacswiki.org/emacs/HideOrIgnoreComments
+
+    - Select region and then hit M-x hide/show-comments or hide/show-comments-toggle
+
+*** Org links
+
+    - Click to follow link
+    - C-c & to go back
+    - 
+    
+*** Internal links in org mode
+
+    M-x customize-variable org-id-link-to-org-use-id
+
+    set to "Create ID to link"
+
+*** Making the background be a default color
+    customize org-format-latex-options  
+
+    Set Foreground "Black" and Background "White"
+    
+*** Org capturing to the current place in the file
+:PROPERTIES:
+:ID:       5a3d9793-bbe8-4ffa-8109-38f41a4f61ea
+:END:
+    
+    C-0 C-c c 
+
+    This is useful for setting up the "CREATED" tag where you can track  
+    your ideas.
+
+    #+begin_src emacs-lisp
+    (defun org-capture-at-point ()
+      "Insert an org capture template at point."
+      (interactive)
+      (org-capture 0))
+    
+    ;(global-set-key (kbd "C-c C-c") #'org-capture-at-point)
+    #+end_src
+
+** Beacon
+(beacon-mode t)
+** Minimap
+:PROPERTIES:
+:ID:       50df8633-601b-46c5-ab8f-9ee6fa0326c5
+:END:
+
+:PROPERTIES:
+:ID:       579815c4-8e23-4cd6-bce9-1e2139634c3d
+:END:
+#+begin_src emacs-lisp
+;; (setq minimap-window-location 'right) 
+;; (map! :leader 
+;;       (:prefix ("t" . "toggle")
+;;                :desc "Toggle minimap-mode" "m" #'minimap-mode))
+#+end_src
+
+** Removing bound variables
+:PROPERTIES:
+:ID:       240fe594-bad4-4519-9893-890d51c6a875
+:END:
+
+#+begin_src emacs-lisp
+; (makeunbound 'my-variable)
+; (fmakeunbound 'my-function)
+;; (org-read-date "3-2-5")
+;; (org-read-date nil nil "+1")
+#+end_src
+
+** Org date manipulations for schedules and deadlines
+:PROPERTIES:
+:ID:       fcf50e17-315f-4dc8-8b7c-d8cdc00bb35b
+:END:
+
+- [[https://sachachua.com/blog/2015/08/org-mode-date-arithmetic/][Sasha Chua's page on doing smart date math]]
+
+#+begin_example
+(org-read-date nil nil "+1")
+(org-read-date nil nil "++mon" nil (org-time-string-to-time "2022-03-15"))
+#+end_example
+
+** Inserting shell commands
+
+(insert (shell-command-to-string "/bin/echo hello"))
+
+* Email
+
+** Outgoing Email server 
+   :PROPERTIES:
+   :ID:       008c9a0f-b7e1-48d5-86a3-8cbb43a28100
+   :END:
+   Send mail using postfix
+#+begin_src emacs-lisp
+(setq send-mail-function 'sendmail-send-it)
+(setq message-send-mail-function 'message-send-mail-with-sendmail)
+#+end_src
+** Mu4E 
+   :PROPERTIES:
+   :ID:       7a47cc0b-9e58-4dba-9461-452e6d005a4a
+   :END:
+#+BEGIN_SRC emacs-lisp
+;;(add-to-list 'load-path "/usr/local/share/emacs/site-lisp/mu4e")
+;;(load-file "/usr/share/emacs/site-lisp/mu4e/mu4e.el")
+(add-to-list 'load-path "/usr/share/emacs/site-lisp/mu4e")
+(require 'mu4e)
+(setq mu4e-sent-messages-behavior 'delete)
+(setq mu4e-maildir (expand-file-name "~/Maildir"))
+(setq mu4e-get-mail-command "true")
+(setq mail-user-agent 'mu4e-user-agent)
+(setq mu4e-drafts-folder "/jdamon-gmail/[jdamon].Drafts")
+(setq mu4e-sent-folder   "/jdamon-gmail/[jdamon].Sent Mail")
+(setq mu4e-trash-folder  "/jdamon-gmail/[jdamon].Trash")
+
+(setq mu4e-sent-messages-behavior 'delete)
+
+(setq mu4e-get-mail-command "mbsync jdamon-gmail")
+
+;; something about ourselves
+   (setq
+      user-mail-address "jdamon@gmail.com"
+      user-full-name  "Jimi Damon"
+      mu4e-compose-signature
+       (concat
+         "Jimi Damon\n"
+         "\n"))
+
+   ;; (See the documentation for `mu4e-sent-messages-behavior' if you have
+   ;; additional non-Gmail addresses and want assign them different
+   ;; behavior.)
+   
+   ;; setup some handy shortcuts
+   ;; you can quickly switch to your Inbox -- press ``ji''
+   ;; then, when you want archive some messages, move them to
+   ;; the 'All Mail' folder by pressing ``ma''.
+
+
+  ;; (setq mu4e-change-filenames-when-moving t)
+  ;; (setq smtpmail-queue-mail nil  ;; start in normal mode
+  ;;       smtpmail-queue-dir   "~/Maildir/queue/cur")
+  ;; (use-package evil-mu4e)
+  ;; (require 'evil-mu4e)
+#+END_SRC
+** Mu4E Alerts
+   :PROPERTIES:
+   :ID:       196aa623-926b-44d7-8d60-be391d6b86eb
+   :END:
+
+#+begin_src emacs-lisp
+(use-package mu4e-alert
+  :ensure t
+  :after mu4e
+  :init
+  ;; (setq mu4e-alert-interesting-mail-query
+  ;;   (concat
+  ;;    "flag:unread maildir:/Exchange/INBOX "
+  ;;    "OR "
+  ;;    "flag:unread maildir:/Gmail/INBOX"
+  ;;    ))
+  (mu4e-alert-enable-mode-line-display)
+  (defun jmd-refresh-mu4e-alert-mode-line ()
+    (interactive)
+    (mu4e~proc-kill)
+    (mu4e-alert-enable-mode-line-display)
+    )
+  (run-with-timer 0 60 'jmd-refresh-mu4e-alert-mode-line)
+  )
+
+
+
+#+end_src
+** Allow MU4E to save links to emails
+   :PROPERTIES:
+   :ID:       fde00a45-2586-4fb5-a6a8-9f7df932ca39
+   :END:
+
+#+begin_src emacs-lisp
+(require 'org-mu4e)
+#+end_src
+** Notmuch configuration
+* Misc
+** Close all buffers
+   :PROPERTIES:
+   :ID:       1394a00c-9d25-48b0-a645-c1cfcb542e1e
+   :END:
+   
+   - [[https://stackoverflow.com/questions/20596475/how-can-i-close-all-opened-frames-in-emacsclient][Reference for closing all buffers]]
+
+   #+begin_src emacs-lisp
+(defun close-all-other-buffers-and-frames ()
+  "Destroy all frames except this one, kill all buffers, display `*scratch*'."
+  (interactive)
+  (set-buffer "*scratch*")
+  (delete-other-frames)
+  (let ((l (buffer-list)) b)
+    (while l
+      (setq b (car l)
+            l (cdr l) )
+      (and (buffer-file-name b)
+           (kill-buffer b) ) ) ) )
+   #+end_src
+
+** Custom blocking
+   :PROPERTIES:
+   :ID:       48df7b8e-d097-4ca6-9764-647842fbded3
+   :END:
+#+begin_src emacs-lisp
+(defun org-agenda-skip-if-blocked ()
+  (let ((next-headline (save-excursion
+                         (or (outline-next-heading) (point-max)))))
+    (if (org-entry-blocked-p) next-headline)))
+
+(defun org-agenda-skip-if-not-blocked ()
+  (let ((next-headline (save-excursion
+                         (or (outline-next-heading) (point-max)))))
+    (if (not (org-entry-blocked-p)) next-headline)))
+
+(add-to-list 'org-agenda-custom-commands
+             '("U" "Unblocked TODOs" alltodo ""
+               ((org-agenda-skip-function '(org-agenda-skip-if-blocked))
+                (org-enforce-todo-checkbox-dependencies nil))
+               ))
+
+(add-to-list 'org-agenda-custom-commands
+             '("R" "Recurring TODOs" alltodo ""
+               ((org-agenda-skip-function '(org-agenda-skip-if-not-blocked))
+                (org-enforce-todo-checkbox-dependencies nil))
+                ))
+
+
+#+end_src
+
+* Global revert
+  :PROPERTIES:
+  :ID:       737ce712-3ea6-4758-b9ad-09fefbde2626
+  :END:
+#+begin_src emacs-lisp
+(global-auto-revert-mode t)
+#+end_src
+
+
+
+
+
+* Extra
+#+begin_src emacs-lisp
+;; (use-package counsel
+;;   :demand t
+;;   :diminish ivy-mode
+;;   :bind
+;;   (("C-c C-r" . ivy-resume)
+;;    ("M-x" . counsel-M-x)
+;;    ("C-c i" . counsel-imenu)
+;;    ("C-x b" . ivy-switch-buffer)
+;;    ("C-x B" . ivy-switch-buffer-other-window)
+;;    ("C-x k" . kill-buffer)
+;;    ("C-x C-f" . counsel-find-file)
+;;    ("C-x l" . counsel-locate)
+;;    ("C-c j" . counsel-git)
+;;    ("C-c s" . counsel-rg)
+;;    ("M-y" . counsel-yank-pop)
+;;    :map help-map
+;;    ("f" . counsel-describe-function)
+;;    ("v" . counsel-describe-variable)
+;;    ("l" . counsel-info-lookup-symbol)
+;;    :map ivy-minibuffer-map
+;;    ("C-o" . ivy-occur)
+;;    ("<return>" . ivy-alt-done)
+;;    ("M-<return>" . ivy-immediate-done)
+;;    :map read-expression-map
+;;    ("C-r" . counsel-minibuffer-history))
+;;   :custom
+;;   (ivy-use-virtual-buffers t)
+;;   (enable-recursive-minibuffers t)
+;;   (ivy-display-style 'fancy)
+;;   (ivy-use-selectable-prompt t)
+;;   (ivy-re-builders-alist
+;;    '((t . ivy--regex-plus)))
+;;   :config
+;;   (ivy-mode +1))
+
+;; (use-package ivy-rich
+;;   :init
+;;   (setq ivy-rich-display-transformers-list ; max column width sum = (ivy-poframe-width - 1)
+;; 	      '(ivy-switch-buffer
+;;           (:columns
+;;            ((ivy-rich-candidate (:width 30))  ; return the candidate itself
+;;             (ivy-rich-switch-buffer-size (:width 7))  ; return the buffer size
+;;             (ivy-rich-switch-buffer-indicators (:width 4 :face error :align right)); return the buffer indicators
+;;             (ivy-rich-switch-buffer-major-mode (:width 12 :face warning))          ; return the major mode info
+;;             (ivy-rich-switch-buffer-project (:width 15 :face success))             ; return project name using `projectile'
+;;             (ivy-rich-switch-buffer-path (:width (lambda (x) (ivy-rich-switch-buffer-shorten-path x (ivy-rich-minibuffer-width 0.3))))))  ; return file path relative to project root or `default-directory' if project is nil
+;;            :predicate
+;;            (lambda (cand) (get-buffer cand)))
+;;           counsel-M-x
+;; 	        (:columns
+;; 	         ((counsel-M-x-transformer (:width 35))
+;; 	          (ivy-rich-counsel-function-docstring (:width 34 :face font-lock-doc-face))))
+;; 	        counsel-describe-function
+;; 	        (:columns
+;; 	         ((counsel-describe-function-transformer (:width 35))
+;; 	          (ivy-rich-counsel-function-docstring (:width 34 :face font-lock-doc-face))))
+;; 	        counsel-describe-variable
+;; 	        (:columns
+;; 	         ((counsel-describe-variable-transformer (:width 35))
+;; 	          (ivy-rich-counsel-variable-docstring (:width 34 :face font-lock-doc-face))))))
+;;   :config
+;;   (ivy-rich-mode +1)
+;;   (setcdr (assq t ivy-format-functions-alist) #'ivy-format-function-line))
+#+end_src
+
+
+* Extraagain
+Magit
+#+begin_src emacs-lisp
+(use-package magit
+  ;; :straight (magit :type git
+  ;;                  :files ("lisp/magit*.el" "lisp/git*.el"
+  ;;                          "Documentation/magit.texi" "Documentation/AUTHORS.md"
+  ;;                          "COPYING" (:exclude "lisp/magit-popup.el"))
+                   ;; :host github :repo "magit/magit")
+  :bind (("s-g" . magit-status)
+         ("C-c g" . magit-status)
+         ("s-G" . magit-blame-addition)
+         ("C-c G" . magit-blame-addition))
+  :hook
+  (magit-mode . hl-line-mode)
+  :custom
+  (magit-auto-revert-mode nil)
+  (magit-log-arguments '("-n100" "--graph" "--decorate"))
+  :config
+  (transient-append-suffix 'magit-log "a"
+    '("w" "Wip" magit-wip-log-current))
+  (magit-define-popup-switch 'magit-log-popup
+                             ?m "Omit merge commits" "--no-merges")
+  (transient-append-suffix 'magit-log "-A"
+    '("-m" "Omit merge commits" "--no-merges")))
+
+#+end_src
+
+
+** Git link
+#+begin_src emacs-lisp
+(use-package git-link
+  :commands
+  (git-link git-link-commit git-link-homepage)
+  :custom
+  (git-link-use-commit t))
+#+end_src
+
+#+begin_src emacs-lisp
+;; (use-package company-org-roam
+;;   :after org-roam company org
+;;   :config
+;;   (company-org-roam-init))
+#+end_src
+
+
+** Math pix
+#+begin_src emacs-lisp
+;; (use-package mathpix.el
+;;   ;; :straight (:host github :repo "jethrokuan/mathpix.el")
+;;   :custom ((mathpix-app-id "app-id")
+;;            (mathpix-app-key "app-key"))
+;;   :bind
+;;   ("C-x m" . mathpix-screenshot))
+#+end_src
+
+** Getting rid of secondary selection
+#+begin_src emacs-lisp
+(global-unset-key [M-mouse-1])
+(global-unset-key [M-drag-mouse-1])
+(global-unset-key [M-down-mouse-1])
+(global-unset-key [M-mouse-3])
+(global-unset-key [M-mouse-2])
+#+end_src
+
+
+
+** References  / Bibliography setup
+#+begin_src emacs-lisp
+(customize-set-value 'org-latex-hyperref-template "
+\\hypersetup{
+ pdfauthor={%a},
+ pdftitle={%t},
+ pdfkeywords={%k},
+ pdfsubject={%d},
+ pdfcreator={%c}, 
+ pdflang={%L},
+ linkcolor={red!50!black},citecolor={blue!50!black},urlcolor={blue!80!black}
+}
+")
+;\\addbibresource{~/Dropbox/org/Zettelkasten/Zettelkasten.bib}
+#+end_src
+
+* Not much mail
+
+* Agenda Stuff
+#+begin_src emacs-lisp
+(setq org-refile-files
+      '("~/Dropbox/org/gtd.org" "~/Dropbox/org/someday.org" "~/Dropbox/org/tickler.org" ))
+
+(setq org-refile-targets
+      '((nil :maxlevel . 3)
+        (org-refile-files :maxlevel . 3)))
+#+end_src
+
+
+* Org Edna
+#+begin_src emacs-lisp
+;; (use-package org-edna 
+;;   :init
+;;   (org-edna-mode)
+;;   (add-hook 'org-mode 'org-edna-mode)
+;;   )
+
+#+end_src
+
+* Org contrib 
+#+begin_src emacs-lisp
+;; (use-package org-contrib 
+;;   :ensure t )
+;; (require 'org-depend )
+
+
+#+end_src
