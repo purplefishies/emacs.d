@@ -1,0 +1,7 @@
+(load-file  (concat (getenv "HOME") "/.emacs.d/key-bindings.el"))
+(defun my-init()
+  (shell-script-mode)
+)
+(add-hook 'after-init-hook #'my-init)
+(add-hook 'after-init-hook #'linum-mode)
+(setq-default major-mode 'shell-script-mode)
