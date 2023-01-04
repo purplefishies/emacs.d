@@ -663,7 +663,11 @@ I like tree-based undo management. I only rarely need it, but when I do, oh boy.
   (defun my-c-mode-hook ()
     (hs-minor-mode))
   (add-hook 'c++-mode-hook 'my-c-mode-hook)
+#+end_src
 
+*** Global line numbers
+#+begin_src emacs-lisp
+(add-hook 'prog-mode-hook 'display-line-numbers-mode)
 #+end_src
 
 *** Adds custom C/C++ headers 
