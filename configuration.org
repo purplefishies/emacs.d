@@ -668,6 +668,7 @@ I like tree-based undo management. I only rarely need it, but when I do, oh boy.
 *** Global line numbers
 #+begin_src emacs-lisp
 (add-hook 'prog-mode-hook 'display-line-numbers-mode)
+(add-hook 'prog-mode-hook 'hs-minor-mode)
 #+end_src
 
 *** Adds custom C/C++ headers 
