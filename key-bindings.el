@@ -1,7 +1,7 @@
   (defun forward-word-correctly (&optional n)
     "Jump forward a word at a time"
     (interactive "P")
-    (search-forward-regexp "[][[()_@#A-Za-z0-9&\\*\\\-\\.\\$]+")
+    (search-forward-regexp "[][[()_@#A-Za-z0-9&\\*\\\-\\.\\$\-]+")
                                           ; [A-Za-z0-9-]+"
     )
 
@@ -9,7 +9,7 @@
     "Jump backward a word at a time"
     (interactive "P")
     (let (i)
-      (search-backward-regexp "\\b[ ]+")
+      (search-backward-regexp "[ ]+")
                                           ;    (search-backward-regexp "[A-Za-z0-9_=)]+")
                                           ;    (search-backward-regexp "[A-Za-z0-9_=\-\\)\\(]+")
       )
@@ -18,7 +18,7 @@
   (global-set-key "\C-xg" 'goto-line)
   (global-set-key "\C-b" 'backward-kill-word)
   (global-set-key "\C-n" 'kill-word)
-  (global-set-key "\C-f" 'backward-word)
+  (global-set-key "\C-f" 'backward-word-correctly)
   (global-set-key "\M-s" 'search-forward-regexp)
   (global-set-key "\C-g" 'forward-word-correctly)
                                           ; New binding to try out
