@@ -91,7 +91,7 @@ Always compile packages, and use the newest version available.
 #+begin_src emacs-lisp
   (use-package helm
     :config
-    (require 'helm-config)   
+    ;; (require 'helm-config)   
     :init
     (helm-mode 1)
     :bind
@@ -1609,7 +1609,7 @@ my buffer.
     (add-to-list 'ac-sources 'ac-source-semantic)
     )
 
-  (add-hook 'c-mode-common-hook 'my-add-semantic-to-autocomplete)
+  ;; (add-hook 'c-mode-common-hook 'my-add-semantic-to-autocomplete)
   (electric-indent-mode -1)
 
 (defun window-toggle-split-direction ()
@@ -2016,7 +2016,7 @@ Hiding leading stars
    (dot . t)
    (ruby . t)
    (octave . t)
-   ;; (scala . t)
+     ;; (scala . t)
    (kotlin . t)
    (maxima . t )
    ))
