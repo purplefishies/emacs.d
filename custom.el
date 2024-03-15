@@ -45,7 +45,7 @@
    '("#dc322f" "#cb4b16" "#b58900" "#5b7300" "#b3c34d" "#0061a8" "#2aa198" "#d33682" "#6c71c4"))
  '(ob-ipython-command "ipython")
  '(org-agenda-todo-ignore-deadlines 'far)
- '(org-agenda-todo-ignore-scheduled 'all)
+ '(org-agenda-todo-ignore-scheduled 'past)
  '(org-agenda-todo-ignore-timestamp 'future)
  '(org-agenda-todo-list-sublevels nil)
  '(org-babel-python-command "python3")
@@ -65,7 +65,7 @@
  '(org-roam-completion-system 'ivy)
  '(org-tags-match-list-sublevels nil)
  '(package-selected-packages
-   '(org-pomodoro org-roam-ui org-chef ox-hugo ob-ess-julia ob-ipython clipboard-collector org-download org-gcal biblio-core org-roam-bibtex bitbake windresize org-caldav ox-gfm mu4e-alert ess ob-go ob-coffeescript yasnippet-snippets yasnippet highlight-doxygen all-the-icons flycheck-kotlin ledger-mode command-log-mode color-theme-sanityinc-tomorrow sanityinc-tomorrow-night solarized-theme deft ivy helm-org-rifle org-roam anki-editor spice-mode projectile evil-magit forge dumb-jump ag rspec-mode chruby moody org-plus-contrib gnu-elpa-keyring-update org-journal kotlin-mode ensime cedit cdlatex ledger-import flycheck-ledger org-babel-eval-in-repl graphviz-dot-mode dot-mode org-drill-table dash yaml-mode scala-mode polymode passthword org-bullets org neotree markdown-mode json-mode groovy-mode gradle-mode gitignore-mode color-theme-modern cmake-mode chess bind-key auto-complete auctex))
+   '(citar-org-roam pdf-tools org-pomodoro org-roam-ui org-chef ox-hugo ob-ess-julia ob-ipython clipboard-collector org-download org-gcal biblio-core org-roam-bibtex bitbake windresize org-caldav ox-gfm mu4e-alert ess ob-go ob-coffeescript yasnippet-snippets yasnippet highlight-doxygen all-the-icons flycheck-kotlin ledger-mode command-log-mode color-theme-sanityinc-tomorrow sanityinc-tomorrow-night solarized-theme deft ivy helm-org-rifle org-roam anki-editor spice-mode projectile evil-magit forge dumb-jump ag rspec-mode chruby moody org-plus-contrib gnu-elpa-keyring-update org-journal kotlin-mode ensime cedit cdlatex ledger-import flycheck-ledger org-babel-eval-in-repl graphviz-dot-mode dot-mode org-drill-table dash yaml-mode scala-mode polymode passthword org-bullets org neotree markdown-mode json-mode groovy-mode gradle-mode gitignore-mode color-theme-modern cmake-mode chess bind-key auto-complete auctex))
  '(pos-tip-background-color "#eee8d5")
  '(pos-tip-foreground-color "#586e75")
  '(send-mail-function 'smtpmail-send-it)

@@ -2120,7 +2120,7 @@ Hiding leading stars
                                 (concat dropbox-directory "archive.org")
                                 (concat dropbox-directory "inbox.org")
                                 (concat dropbox-directory "reckoning.org")
-                                (concat dropbox-base "work.org")
+                                (concat dropbox-directory "work.org")
                                 )
                                ))
 
@@ -3046,7 +3046,7 @@ For exporting
                ))
 
 (add-to-list 'org-agenda-custom-commands
-             '("R" "Recurring TODOs" alltodo ""
+             '("R" "Recurring and Blocked TODOs" alltodo ""
                ((org-agenda-skip-function '(org-agenda-skip-if-not-blocked))
                 (org-enforce-todo-checkbox-dependencies nil))
                 ))
