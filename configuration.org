@@ -1697,6 +1697,7 @@ i.e. change right window to bottom, or change bottom window to right."
 #+BEGIN_SRC emacs-lisp
 (setq org-directory "~/Dropbox/org/")
 (setq dropbox-directory "~/Dropbox/org/")
+(setq dropbox-base "~/Dropbox/")
 (add-hook 'org-mode-hook 'outline-minor-mode)
 (add-hook 'org-mode-hook 'turn-on-auto-fill)
 (add-hook 'org-mode-hook 'turn-on-flyspell)
@@ -1993,7 +1994,7 @@ Hiding leading stars
 ;; jd/journal-date-path
 (setq org-capture-templates                                                                                                                            
       '(("t" "Todo" entry (file+headline "~/Dropbox/org/inbox.org" "Tasks")  "* TODO %?\n%i\n   %a")
-        ("j" "Journal" plain (file+function "~/Dropbox/org/journal.org" jd/find-create-date-entry ) "** %?\n" )
+        ("j" "Journal" plain (file+function "~/Dropbox/org/journal.org" jd/find-create-date-entry ) "** %?\n    %i\n\n   %a" )
         ("W" "Work Journal" plain (file+function "~/Dropbox/org/workjournal.org" jd/find-create-date-entry ) "** %?\t\t:@work:\n    %i\n%a" )
         ("S" "Someday Task" entry (file+headline "~/Dropbox/org/someday.org" "Tasks")
          "* %?\t\t:question:\n    :PROPERTIES:\n    :MODIFIED: %U\n    :END:\n")
@@ -2009,7 +2010,7 @@ Hiding leading stars
 (org-babel-do-load-languages
  'org-babel-load-languages
  '((python . t)
-   (ledger . t)
+   ;; (ledger . t)
    (latex . t)
    (ditaa . t)
    (shell . t)
@@ -2113,10 +2114,13 @@ Hiding leading stars
 (setq org-agenda-files (append (list 
                                 (concat dropbox-directory "workjournal.org")
                                 (concat dropbox-directory "journal.org")
+                                (concat dropbox-directory "personal.org")
                                 (concat dropbox-directory "tickler.org")
                                 (concat dropbox-directory "gtd.org")
                                 (concat dropbox-directory "archive.org")
                                 (concat dropbox-directory "inbox.org")
+                                (concat dropbox-directory "reckoning.org")
+                                (concat dropbox-base "work.org")
                                 )
                                ))
 
@@ -2922,28 +2926,28 @@ For exporting
 #+BEGIN_SRC emacs-lisp
 ;;(add-to-list 'load-path "/usr/local/share/emacs/site-lisp/mu4e")
 ;;(load-file "/usr/share/emacs/site-lisp/mu4e/mu4e.el")
-(add-to-list 'load-path "/usr/share/emacs/site-lisp/mu4e")
-(require 'mu4e)
-(setq mu4e-sent-messages-behavior 'delete)
-(setq mu4e-maildir (expand-file-name "~/Maildir"))
-(setq mu4e-get-mail-command "true")
-(setq mail-user-agent 'mu4e-user-agent)
-(setq mu4e-drafts-folder "/jdamon-gmail/[jdamon].Drafts")
-(setq mu4e-sent-folder   "/jdamon-gmail/[jdamon].Sent Mail")
-(setq mu4e-trash-folder  "/jdamon-gmail/[jdamon].Trash")
+;; (add-to-list 'load-path "/usr/share/emacs/site-lisp/elpa-src/mu4e-1.8.14")
+;; (require 'mu4e)
+;; (setq mu4e-sent-messages-behavior 'delete)
+;; (setq mu4e-maildir (expand-file-name "~/Maildir"))
+;; (setq mu4e-get-mail-command "true")
+;; (setq mail-user-agent 'mu4e-user-agent)
+;; (setq mu4e-drafts-folder "/jdamon-gmail/[jdamon].Drafts")
+;; (setq mu4e-sent-folder   "/jdamon-gmail/[jdamon].Sent Mail")
+;; (setq mu4e-trash-folder  "/jdamon-gmail/[jdamon].Trash")
 
-(setq mu4e-sent-messages-behavior 'delete)
+;; (setq mu4e-sent-messages-behavior 'delete)
 
-(setq mu4e-get-mail-command "mbsync jdamon-gmail")
+;; (setq mu4e-get-mail-command "mbsync jdamon-gmail")
 
-;; something about ourselves
-   (setq
-      user-mail-address "jdamon@gmail.com"
-      user-full-name  "Jimi Damon"
-      mu4e-compose-signature
-       (concat
-         "Jimi Damon\n"
-         "\n"))
+;; ;; something about ourselves
+;;    (setq
+;;       user-mail-address "jdamon@gmail.com"
+;;       user-full-name  "Jimi Damon"
+;;       mu4e-compose-signature
+;;        (concat
+;;          "Jimi Damon\n"
+;;          "\n"))
 
    ;; (See the documentation for `mu4e-sent-messages-behavior' if you have
    ;; additional non-Gmail addresses and want assign them different
@@ -2995,7 +2999,7 @@ For exporting
    :END:
 
 #+begin_src emacs-lisp
-(require 'org-mu4e)
+;; (require 'org-mu4e)
 #+end_src
 ** Notmuch configuration
 * Misc
@@ -3218,7 +3222,7 @@ Magit
 * Org Refiling
 #+begin_src emacs-lisp
 (setq org-refile-files
-      '("~/Dropbox/org/gtd.org" "~/Dropbox/org/someday.org" "~/Dropbox/org/tickler.org" ))
+      '("~/Dropbox/org/gtd.org" "~/Dropbox/org/someday.org" "~/Dropbox/org/tickler.org" "~/Dropbox/org/reckoning.org" ))
 
 (setq org-refile-targets
       '((nil :maxlevel . 3)
@@ -3244,3 +3248,13 @@ Magit
 
 
 #+end_src
+* Crazy yank
+#+begin_src emacs-lisp
+(defun crazy-yank ()
+  (interactive)
+  (delete-char (length (current-kill 0)))
+  (yank))
+
+(global-set-key (kbd "C-M-y") 'crazy-yank)
+#+end_src
+

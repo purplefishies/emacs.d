@@ -8,7 +8,7 @@
  '(ansi-color-names-vector
    (vector "#000000" "#d54e53" "#b9ca4a" "#e7c547" "#7aa6da" "#c397d8" "#70c0b1" "#eaeaea"))
  '(beacon-color "#d54e53")
- '(bibtex-dialect 'biblatex)
+ '(column-number-mode t)
  '(compilation-message-face 'default)
  '(cua-global-mark-cursor-color "#2aa198")
  '(cua-normal-cursor-color "#657b83")
@@ -21,7 +21,6 @@
  '(fci-rule-color "#424242")
  '(flycheck-color-mode-line-face-to-color 'mode-line-buffer-id)
  '(frame-background-mode 'dark)
- '(helm-completion-style 'helm)
  '(highlight-changes-colors '("#d33682" "#6c71c4"))
  '(highlight-symbol-colors
    '("#eef6d970af00" "#cef5e0cccfbb" "#fd55c91cb29c" "#dadbd2efdc17" "#e0a3de02afa1" "#f84bcba1ad99" "#d28bd9ebdf8a"))
@@ -44,64 +43,29 @@
  '(markdown-command "pandoc ")
  '(nrepl-message-colors
    '("#dc322f" "#cb4b16" "#b58900" "#5b7300" "#b3c34d" "#0061a8" "#2aa198" "#d33682" "#6c71c4"))
- '(org-agenda-files
-   '("/home/jimi_damon/Dropbox/org/workjournal.org" "/home/jimi_damon/Dropbox/org/journal.org" "/home/jimi_damon/Dropbox/org/tickler.org" "/home/jimi_damon/Dropbox/org/gtd.org" "/home/jimi_damon/Dropbox/org/archive.org" "/home/jimi_damon/Dropbox/org/inbox.org" "/home/jimi_damon/Dropbox/org/blah.org"))
- '(org-capture-templates
-   '(("t" "Todo" entry
-      (file+headline "~/Projects/org/todo.org" "Tasks")
-      "* TODO %?
-%i
-   %a")
-     ("j" "Journal" entry
-      (file+olp+datetree "~/Dropbox/org/journal.org")
-      "* %? %^G
-Entered on %U
-")
-     ("W" "Work Journal" entry
-      (file+olp+datetree "~/Dropbox/org/workjournal.org")
-      "* %?
-   %i
-   %a
-Enterered on %U
-")
-     ("q" "Writing log" entry
-      (file "~/Projects/org/questions.org")
-      "* %?
-    :PROPERTIES:
-    :CREATED: %U
-    :MODIFIED: %U
-    :END:
-")
-     ("s" "Subscribe to an RSS feed" plain
-      (file "~/Documents/rss/urls")
-      "%^{Feed URL} \"~%^{Feed name}\"")))
+ '(ob-ipython-command "ipython")
+ '(org-agenda-todo-ignore-deadlines 'far)
+ '(org-agenda-todo-ignore-scheduled 'all)
+ '(org-agenda-todo-ignore-timestamp 'future)
+ '(org-agenda-todo-list-sublevels nil)
+ '(org-babel-python-command "python3")
  '(org-checkbox-hierarchical-statistics nil)
- '(org-deadline-warning-days 10)
- '(org-file-apps
-   '((auto-mode . emacs)
-     ("\\.mm\\'" . default)
-     ("\\.x?html?\\'" . default)
-     ("\\.pdf\\'" . "evince %s")))
  '(org-format-latex-options
-   '(:foreground default :background default :scale 2.0 :html-foreground "Black" :html-background "Transparent" :html-scale 1.0 :matchers
+   '(:foreground "Black" :background "White" :scale 2.0 :html-foreground "Black" :html-background "Transparent" :html-scale 1.0 :matchers
                  ("begin" "$1" "$" "$$" "\\(" "\\[")))
- '(org-latex-hyperref-template
-   "\\hypersetup{
- pdfauthor={%a},
- pdftitle={%t},
- pdfkeywords={%k},
- pdfsubject={%d},
- pdfcreator={%c}, 
- pdflang={%L},
- citecolor=electricblue,linkcolor={red!50!black},urlcolor=electricblue}")
+ '(org-id-link-to-org-use-id t)
+ '(org-journal-date-format "%e %b %Y (%A)")
+ '(org-journal-dir "~/Projects/org/journal/")
+ '(org-journal-file-format "%Y%m%d" t)
+ '(org-journal-time-format "")
  '(org-lowest-priority 68)
  '(org-modules
-   '(ol-bbdb ol-bibtex org-ctags ol-docview ol-gnus ol-info ol-irc ol-mhe ol-rmail ol-w3m org-learn))
- '(org-priority-lowest 68)
+   '(org-habit org-bbdb org-bibtex org-ctags org-docview org-gnus org-info org-irc org-mhe org-rmail org-w3m org-learn))
  '(org-priority-start-cycle-with-default t)
  '(org-roam-completion-system 'ivy)
+ '(org-tags-match-list-sublevels nil)
  '(package-selected-packages
-   '(rust-mode org-contrib org-edna org-super-agenda typescript-mode typescript pcre2el pcre-query-replace-regexp notmuch curl git-link magit company-org-roam ivy-rich counsel doom-modeline doom-themes citar-embark citar websocket org-view-mode org-bibtex org-jira ob-kotlin undo-tree flycheck company minions queue org-roam-timestamps org-roam-ui org-ref org-roam-bibtex ivy-bibtex helm-bibtex clang-format bitbake-mode bitbake auctex ox-hugo org-chef windresize doct org-anki anki-mode anki-connect lua-mode org-caldav ox-gfm mu4e-alert ess ob-go ob-coffeescript yasnippet-snippets yasnippet highlight-doxygen all-the-icons flycheck-kotlin ledger-mode command-log-mode color-theme-sanityinc-tomorrow sanityinc-tomorrow-night solarized-theme deft ivy helm-org-rifle org-roam anki-editor org-download spice-mode projectile evil-magit forge dumb-jump ag rspec-mode chruby moody org-plus-contrib gnu-elpa-keyring-update org-journal kotlin-mode ensime cedit cdlatex ledger-import flycheck-ledger org-babel-eval-in-repl graphviz-dot-mode dot-mode org-drill-table dash yaml-mode scala-mode polymode passthword org-bullets org neotree markdown-mode json-mode groovy-mode gradle-mode gitignore-mode color-theme-modern cmake-mode chess bind-key auto-complete))
+   '(org-pomodoro org-roam-ui org-chef ox-hugo ob-ess-julia ob-ipython clipboard-collector org-download org-gcal biblio-core org-roam-bibtex bitbake windresize org-caldav ox-gfm mu4e-alert ess ob-go ob-coffeescript yasnippet-snippets yasnippet highlight-doxygen all-the-icons flycheck-kotlin ledger-mode command-log-mode color-theme-sanityinc-tomorrow sanityinc-tomorrow-night solarized-theme deft ivy helm-org-rifle org-roam anki-editor spice-mode projectile evil-magit forge dumb-jump ag rspec-mode chruby moody org-plus-contrib gnu-elpa-keyring-update org-journal kotlin-mode ensime cedit cdlatex ledger-import flycheck-ledger org-babel-eval-in-repl graphviz-dot-mode dot-mode org-drill-table dash yaml-mode scala-mode polymode passthword org-bullets org neotree markdown-mode json-mode groovy-mode gradle-mode gitignore-mode color-theme-modern cmake-mode chess bind-key auto-complete auctex))
  '(pos-tip-background-color "#eee8d5")
  '(pos-tip-foreground-color "#586e75")
  '(send-mail-function 'smtpmail-send-it)
@@ -130,7 +94,6 @@ Enterered on %U
      (340 . "#e7c547")
      (360 . "#b9ca4a")))
  '(vc-annotate-very-old-color nil)
- '(warning-suppress-types '((comp) (comp)))
  '(weechat-color-list
    '(unspecified "#fdf6e3" "#eee8d5" "#a7020a" "#dc322f" "#5b7300" "#859900" "#866300" "#b58900" "#0061a8" "#268bd2" "#a00559" "#d33682" "#007d76" "#2aa198" "#657b83" "#839496"))
  '(window-divider-mode nil)
@@ -144,15 +107,11 @@ Enterered on %U
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(mode-line ((t (:height 0.85))))
- '(mode-line-inactive ((t (:height 0.85))))
  '(org-agenda-current-time ((t (:foreground "chartreuse"))))
- '(org-agenda-dimmed-todo-face ((t (:foreground "medium purple"))))
  '(org-agenda-done ((t (:foreground "sea green"))))
  '(org-done ((t (:foreground "sea green" :weight bold))))
  '(org-level-4 ((t (:foreground "light goldenrod"))))
  '(org-priority ((t (:foreground "light goldenrod"))))
- '(org-roam-link ((t (:inherit org-link :foreground "#C991E1"))))
  '(org-scheduled ((t (:foreground "light salmon"))))
  '(org-scheduled-today ((t (:foreground "light goldenrod"))))
  '(org-time-grid ((t (:foreground "PaleGreen4"))))
