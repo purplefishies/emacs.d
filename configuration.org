@@ -159,21 +159,30 @@ window on top of a cool european city backdrop. I like the Sanityinc tomorrow th
 I'm still not sure why this can't be loaded through use-package
 
 #+BEGIN_SRC emacs-lisp
-   (use-package color-theme-sanityinc-tomorrow)
-  ;(require 'color-theme-sanityinc-tomorrow)
+    ;(use-package color-theme-sanityinc-tomorrow)
+    ;(require 'color-theme-sanityinc-tomorrow)
+    ;(use-package color-theme-sanityinc-tomorrow-blue)
 
-  (defun transparency (value)
-    "Sets the transparency of the frame window. 0=transparent/100=opaque."
-    (interactive "nTransparency Value 0 - 100 opaque:")
-    (set-frame-parameter (selected-frame) 'alpha value))
 
-  (defun jmd/apply-theme ()
-    "Apply the `solarized-light' theme and make frames just slightly transparent."
-    (interactive)
-    (color-theme-sanityinc-tomorrow-bright)
-    ;; (load-theme 'solarized-light t)
-    (transparency 96))
+    (defun transparency (value)
+      "Sets the transparency of the frame window. 0=transparent/100=opaque."
+      (interactive "nTransparency Value 0 - 100 opaque:")
+      (set-frame-parameter (selected-frame) 'alpha value))
+
+  (use-package color-theme-sanityinc-tomorrow
+    :ensure t
+    :config
+    (load-theme 'sanityinc-tomorrow-blue t))
+
+    (defun jmd/apply-theme ()
+      "Apply the `solarized-light' theme and make frames just slightly transparent."
+      (interactive)
+      ;(color-theme-sanityinc-tomorrow-bright)
+      (color-theme-sanityinc-tomorrow-blue)
+      ;; (load-theme 'solarized-light t)
+      (transparency 96))
 #+END_SRC
+
 
 If this code is being evaluated by =emacs --daemon=, ensure that each subsequent
 frame is themed appropriately.
@@ -259,7 +268,7 @@ as point goes.
    :END:
 
 #+BEGIN_SRC emacs-lisp
-(set-frame-font "Monaco-12")
+  ;; (set-frame-font "Monaco-12")
 #+END_SRC
 
 ** Display / Color
@@ -1737,6 +1746,9 @@ I like to see an outline of pretty bullets instead of a list of asterisks.
   (add-hook 'org-mode-hook 'org-bullets-mode))
 (setq org-bullets-bullet-list '("◉" "○" "✸"  "☯" "✿" "✜" "☯" "◆" "☯" "▶" ))
 
+;(setq org-bullets-bullet-list '("Ⓐ" "Ⓑ" "Ⓒ" "Ⓓ" "Ⓔ" "Ⓕ" "Ⓖ" ))
+;(setq org-bullets-bullet-list '("Ⓐ" "Ⓑ" "Ⓒ" "Ⓓ" "Ⓔ" "Ⓕ" "Ⓖ"))
+;(setq org-bullets-bullet-list '("ⓐ" "ⓑ" "ⓒ" "ⓓ" "ⓔ" "ⓕ" "ⓖ" "ⓗ" "ⓘ" "ⓙ" "ⓚ" "ⓛ" "ⓜ" ))
 #+END_SRC
 
 ** Changing colors of Org 
@@ -1904,6 +1916,16 @@ Hiding leading stars
 #+RESULTS:
 : jmd/mark-done-and-archive
 
+** Org Todo headings
+#+begin_src emacs-lisp
+    (with-eval-after-load 'org
+      ;; One global default sequence for all Org files:
+      (setq org-todo-keywords
+            '((sequence "TODO(t)" "NEXT(n)" "PROGRESS(r)" "WAITING(w)"
+                        "|" "DONE(d)" "|" "POSTPONED(P)"))))
+    #+end_src
+
+
 ** Exporting code
    :PROPERTIES:
    :ID:       67909117-604a-43b0-8d66-24096a099920
@@ -2010,7 +2032,7 @@ Hiding leading stars
 (org-babel-do-load-languages
  'org-babel-load-languages
  '((python . t)
-   ;; (ledger . t)
+   (ledger . t)
    (latex . t)
    (ditaa . t)
    (shell . t)
@@ -2118,9 +2140,12 @@ Hiding leading stars
                                 (concat dropbox-directory "tickler.org")
                                 (concat dropbox-directory "gtd.org")
                                 (concat dropbox-directory "archive.org")
+                                (concat dropbox-directory "gcal.org")
+                                (concat dropbox-directory "knowledge.org")
                                 (concat dropbox-directory "inbox.org")
                                 (concat dropbox-directory "reckoning.org")
                                 (concat dropbox-directory "work.org")
+                                (concat dropbox-directory "projects.org")
                                 )
                                ))
 
@@ -2164,7 +2189,6 @@ Hiding leading stars
                          ;; (:name "Scheduled soon"
                          ;;        :scheduled (before ,(format "%s" "2022-12-01"))
                          ;;        )
-                                
                          ;; (:name "FOO" 
                          ;;        :deadline (before "2022-11-19"))
                          ;; (:discard (:deadline (after "2022-11-20")))
@@ -2187,8 +2211,8 @@ Hiding leading stars
                        (org-super-agenda-groups
                         '(
                           (:name "Inbox"
-                                 :order 6
-                                 :file-path "inbox"
+                                           :order 6
+                                           :file-path "inbox"
                                  )
                           (:name "Waiting"
                                 :todo "WAITING"
@@ -2198,7 +2222,7 @@ Hiding leading stars
                           ;;        :deadline nil
                           ;;        :and (:todo "NEXT"))
                           (:discard (:todo "TODO"))
-                          (:discard (:category "tickler"))
+                          ;; (:discard (:category "tickler"))
                           (:discard (:tag "call"))
                           (:auto-category t :order 9)
                           (:name "Next Steps"
@@ -3138,11 +3162,6 @@ For exporting
 Magit
 #+begin_src emacs-lisp
 (use-package magit
-  ;; :straight (magit :type git
-  ;;                  :files ("lisp/magit*.el" "lisp/git*.el"
-  ;;                          "Documentation/magit.texi" "Documentation/AUTHORS.md"
-  ;;                          "COPYING" (:exclude "lisp/magit-popup.el"))
-                   ;; :host github :repo "magit/magit")
   :bind (("s-g" . magit-status)
          ("C-c g" . magit-status)
          ("s-G" . magit-blame-addition)
@@ -3153,12 +3172,38 @@ Magit
   (magit-auto-revert-mode nil)
   (magit-log-arguments '("-n100" "--graph" "--decorate"))
   :config
+  ;; Add "Wip" entry under "a"
   (transient-append-suffix 'magit-log "a"
     '("w" "Wip" magit-wip-log-current))
-  (magit-define-popup-switch 'magit-log-popup
-                             ?m "Omit merge commits" "--no-merges")
+
+  ;; Add `--no-merges` switch with key `-m`
   (transient-append-suffix 'magit-log "-A"
     '("-m" "Omit merge commits" "--no-merges")))
+
+
+
+;; (use-package magit
+;;   ;; :straight (magit :type git
+;;   ;;                  :files ("lisp/magit*.el" "lisp/git*.el"
+;;   ;;                          "Documentation/magit.texi" "Documentation/AUTHORS.md"
+;;   ;;                          "COPYING" (:exclude "lisp/magit-popup.el"))
+;;                    ;; :host github :repo "magit/magit")
+;;   :bind (("s-g" . magit-status)
+;;          ("C-c g" . magit-status)
+;;          ("s-G" . magit-blame-addition)
+;;          ("C-c G" . magit-blame-addition))
+;;   :hook
+;;   (magit-mode . hl-line-mode)
+;;   :custom
+;;   (magit-auto-revert-mode nil)
+;;   (magit-log-arguments '("-n100" "--graph" "--decorate"))
+;;   :config
+;;   (transient-append-suffix 'magit-log "a"
+;;     '("w" "Wip" magit-wip-log-current))
+;;   (magit-define-popup-switch 'magit-log-popup
+;;                              ?m "Omit merge commits" "--no-merges")
+;;   (transient-append-suffix 'magit-log "-A"
+;;     '("-m" "Omit merge commits" "--no-merges")))
 
 #+end_src
 
@@ -3222,13 +3267,13 @@ Magit
 * Org Refiling
 #+begin_src emacs-lisp
 (setq org-refile-files
-      '("~/Dropbox/org/gtd.org" "~/Dropbox/org/someday.org" "~/Dropbox/org/tickler.org" "~/Dropbox/org/reckoning.org" ))
+      '("~/Dropbox/org/gtd.org" "~/Dropbox/org/someday.org" "~/Dropbox/org/tickler.org" "~/Dropbox/org/reckoning.org" 
+        "~/Dropbox/org/knowledge.org"))
 
 (setq org-refile-targets
       '((nil :maxlevel . 3)
         (org-refile-files :maxlevel . 3)))
 #+end_src
-
 
 * Org Edna
 #+begin_src emacs-lisp
@@ -3245,9 +3290,105 @@ Magit
 ;; (use-package org-contrib 
 ;;   :ensure t )
 ;; (require 'org-depend )
+#+end_src
+* Org adding files
+#+begin_src emacs-lisp
 
+(require 'subr-x)
+(require 'org)
+
+(defun my/org--uuid ()
+  "Return a UUID string."
+  (cond
+   ((fboundp 'org-id-uuid) (org-id-uuid))
+   ((executable-find "uuidgen")
+    (string-trim (shell-command-to-string "uuidgen")))
+   (t
+    (error "No UUID generator available; install uuidgen or load org-id"))))
+
+(defun my/org--asset-month ()
+  "Return current month abbreviation like Jan, Feb, etc."
+  (format-time-string "%b"))
+
+(defun my/org--asset-year ()
+  "Return current year as a string."
+  (format-time-string "%Y"))
+
+(defun my/org--allowed-image-p (file)
+  "Return non-nil if FILE has an allowed extension."
+  (member (downcase (or (file-name-extension file) ""))
+          '("jpg" "jpeg" "png" "pdf")))
+
+(defun my/org--git-root (dir)
+  "Return the git root for DIR, or nil if none."
+  (locate-dominating-file dir ".git"))
+
+(defun my/org--relative-or-absolute-path (target)
+  "Return TARGET relative to current buffer file if possible, else absolute."
+  (if buffer-file-name
+      (file-relative-name target (file-name-directory buffer-file-name))
+    (expand-file-name target)))
+
+(defun my/org-add-external-file (file)
+  "Copy FILE into ~/Dropbox/org/YEAR/MON/UUID_ORIGINAL_FILENAME.ext,
+insert an Org link to it, then git-add and git-commit it."
+  (interactive
+   (list (read-file-name "Image/PDF: " nil nil t)))
+  (unless (buffer-file-name)
+    (error "Current buffer is not visiting a file"))
+  (unless (derived-mode-p 'org-mode)
+    (error "Current buffer is not in org-mode"))
+  (unless (file-exists-p file)
+    (error "File does not exist: %s" file))
+  (unless (my/org--allowed-image-p file)
+    (error "Only jpg, jpeg, png, and pdf files are supported"))
+
+  (let* ((source (expand-file-name file))
+         (ext    (downcase (file-name-extension source)))
+         (base   (file-name-base source))
+         (uuid   (my/org--uuid))
+         (year   (my/org--asset-year))
+         (mon    (my/org--asset-month))
+         (dest-dir (expand-file-name
+                    (format "~/Dropbox/org/%s/%s/" year mon)))
+         (dest-name (format "%s_%s.%s" uuid base ext))
+         (dest-file (expand-file-name dest-name dest-dir))
+         (org-path (my/org--relative-or-absolute-path dest-file))
+         (git-root (my/org--git-root dest-dir))
+         (default-directory (or git-root default-directory)))
+
+    (make-directory dest-dir t)
+    (copy-file source dest-file nil)
+
+    ;; Insert Org markup.
+    ;; For images, add a caption-friendly block; for PDFs, insert a normal link.
+    (cond
+     ((member ext '("jpg" "jpeg" "png"))
+      (insert (format "[[file:%s]]" org-path))
+      (when (fboundp 'org-display-inline-images)
+        (org-display-inline-images)))
+     ((string= ext "pdf")
+      (insert (format "[[file:%s]]" org-path))))
+
+    ;; Save current Org buffer so the inserted link is written.
+    (save-buffer)
+
+    ;; Git add + commit if destination is inside a git repo.
+    (if git-root
+        (let* ((rel-to-repo (file-relative-name dest-file git-root))
+               (commit-msg (format ":robot: Add org asset %s" dest-name)))
+          (unless (zerop (call-process "git" nil nil nil "add" "--" rel-to-repo))
+            (error "git add failed for %s" rel-to-repo))
+          (unless (zerop (call-process "git" nil nil nil
+                                       "commit" "-m" commit-msg "--" rel-to-repo))
+            (error "git commit failed for %s" rel-to-repo))
+          (message "Copied, inserted, and committed: %s" dest-file))
+      (message "Copied and inserted: %s (not in a git repo, so no
+    commit)" dest-file))))
 
 #+end_src
+
+
 * Crazy yank
 #+begin_src emacs-lisp
 (defun crazy-yank ()
@@ -3258,3 +3399,229 @@ Magit
 (global-set-key (kbd "C-M-y") 'crazy-yank)
 #+end_src
 
+10* Adding notes and Agenda at current file
+
+- https://emacs.stackexchange.com/questions/30595/how-to-org-capture-at-current-location
+- Example
+#+begin_src emacs-lisp
+(defun org-capture-at-point ()
+  "Insert an org capture template at point."
+  (interactive)
+  (org-capture 0))
+
+(global-set-key (kbd "C-c C-c") #'org-capture-at-point)
+#+end_src
+
+
+** Showing the current file's list of notes
+
+- https://emacs.stackexchange.com/questions/59998/restrict-agenda-to-current-buffer-with-few-keystrokes
+#+begin_src emacs-lisp
+ (defun my/org-agenda-list-current-buffer ()
+  (interactive)
+  (let ((org-agenda-files (list (buffer-file-name (current-buffer)))))
+      (call-interactively #'org-agenda)))
+#+end_src
+
+
+* Org disabling
+#+begin_src emacs-lisp
+(setq org-agenda-inhibit-startup t)
+#+end_src
+* PDF-Tools
+#+begin_src emacs-lisp
+
+(use-package pdf-tools
+  :ensure t
+  :config
+  ;; Uncomment one of the following based on your preference:
+  ;; (pdf-tools-install)  ; Standard activation
+  (pdf-loader-install)   ; On-demand loading for faster startup
+  :mode ("\\.pdf\\'" . pdf-view-mode))
+
+;; (use-package pdf-tools
+;;   :ensure t
+;;   :config
+;;   (pdf-tools-install)  ; Standard activation, or use pdf-loader-install for on-demand loading
+;;   :mode ("\\.pdf\\'" . pdf-view-mode))
+#+end_src
+
+* Org noter
+
+#+begin_src emacs-lisp
+(use-package org-noter
+  :after pdf-tools
+  :ensure t
+  :config
+  ;; Optional configuration for org-noter
+  (setq org-noter-auto-save-last-location t
+        org-noter-notes-search-path '("~/Dropbox/org/notes")))
+#+end_src
+
+#+RESULTS:
+: t
+
+* GCal
+
+#+begin_src emacs-lisp
+(use-package org-gcal
+  :ensure t
+  :config
+  (let ((secret-file (expand-file-name "~/.emacs.d/secrets.el")))
+    (when (file-exists-p secret-file)
+      (load secret-file)))
+  (setq org-gcal-client-id my-google-client-id
+        org-gcal-client-secret my-google-client-secret
+        org-gcal-file-alist '(("jdamon@gmail.com" .  "~/Dropbox/org/gcal.org"))))
+#+end_src
+
+#+RESULTS:
+: t
+
+
+* Reverting 
+#+begin_src emacs-lisp
+;; Automatically reload files that change on disk
+(global-auto-revert-mode t)
+
+;; Suppress messages in the minibuffer about auto-reverting
+(setq auto-revert-verbose nil)
+
+#+end_src
+
+
+* Anki on WSL
+#+begin_src emacs-lisp
+(defun my/in-wsl-p ()
+  "Return non-nil if we're running inside WSL."
+  (and (eq system-type 'gnu/linux)
+       (file-exists-p "/proc/sys/fs/binfmt_misc/WSLInterop")))
+
+(defun my/wsl-windows-ankiconnect-ip ()
+  "Get Windows host IP for the vEthernet (WSL) adapter by calling ipconfig.exe."
+  (string-trim
+   (shell-command-to-string
+    "/mnt/c/Windows/System32/ipconfig.exe | tr -d '\\r' | \
+     awk '/Ethernet adapter vEthernet \\(WSL\\)/{f=1} f && /IPv4 Address/{print $NF; exit}'")))
+
+(setq org-anki-ankiconnnect-listen-address
+      (if (my/in-wsl-p)
+          (format "http://%s:8765" (my/wsl-windows-ankiconnect-ip))
+        "http://127.0.0.1:8765"))
+
+;; (defun my/wsl-windows-ankiconnect-ip ()
+;;   "Get Windows host IP for the vEthernet (WSL) adapter by calling ipconfig.exe."
+;;   (string-trim
+;;    (shell-command-to-string
+;;     "/mnt/c/Windows/System32/ipconfig.exe | tr -d '\\r' | grep -P 'Ethernet.*WSL' -A4 | cut -d\":\" -f2 | tail -n1 | sed -e 's/[[:space:]]*//g'")))
+;; ;; org-anki uses this URL (default is http://127.0.0.1:8765 which fails in WSL2)
+;; (setq org-anki-ankiconnnect-listen-address
+;;       (format "http://%s:8765" (my/wsl-windows-ankiconnect-ip)))
+
+(setq org-use-sub-superscripts '{})
+
+(setq my/org-anki-default-deck "Import")
+
+(defun my/org-anki-get-deck ()
+  "Return deck from org header or fallback to default."
+  (or (org-entry-get (point) "ANKI_DECK" t)
+      my/org-anki-default-deck))
+
+(defun my/org-anki-ensure-deck ()
+  (unless (org-entry-get (point) "ANKI_DECK")
+    (org-set-property "ANKI_DECK" my/org-anki-default-deck)))
+
+(add-hook 'org-anki-before-entry-sync-hook #'my/org-anki-ensure-deck)
+
+#+end_src
+
+
+#+begin_src text
+org-mode exports _ as subscripts and ^ as superscripts The default
+export behavior can be customized using the menus Org -> Customize ->
+Browse Org Group. To update the default behavior for subscripts &
+superscripts, choose:
+
+[-]-\ Group Org Export
+[-]-\ Group Org Export General
+— Option Org Export With Sub Superscripts
+#+end_src
+
+* Magit delta
+
+#+begin_src emacs-lisp
+;; MELPA required
+(use-package magit-delta
+  :ensure t
+  :hook (magit-mode . magit-delta-mode)
+  ;; optional: pass delta flags
+  :custom
+  (magit-delta-delta-args '("--navigate" "--line-numbers")))
+#+end_src
+
+
+
+* Auto commit org
+#+begin_src emacs-lisp
+
+(defun my-org-auto-commit ()
+  "Auto commit org files to git on save."
+  (when (and buffer-file-name
+             (string-match "\\.org\\'" buffer-file-name))
+    (let* ((default-directory (locate-dominating-file buffer-file-name ".git"))
+           (msg (format ":robot:  %s" (file-name-nondirectory buffer-file-name))))
+      (when default-directory
+        (shell-command (format "git add %s" (shell-quote-argument buffer-file-name)))
+        (shell-command (format "git commit -m %s" (shell-quote-argument msg)))))))
+
+(add-hook 'after-save-hook #'my-org-auto-commit)
+#+end_src
+
+
+
+* Jedi for python
+
+#+begin_src emacs-lisp
+;; (use-package company
+;;   :ensure t
+;;   :hook (python-mode . company-mode))
+;; (use-package company-jedi
+;;   :ensure t
+;;   :after company
+;;   :hook (python-mode . (lambda ()
+;;                          (add-to-list 'company-backends 'company-jedi))))
+#+end_src
+
+
+* Pyright
+This is used for learning about the Python code base
+
+#+begin_src emacs-lisp
+(use-package lsp-mode
+  :ensure t
+  :hook (python-mode . lsp)
+  :commands lsp)
+
+(use-package lsp-ui
+  :ensure t
+  :commands lsp-ui-mode)
+
+(use-package company
+  :ensure t
+  :hook (after-init . global-company-mode))
+
+(use-package lsp-pyright
+  :ensure t
+  :after lsp-mode
+  :hook (python-mode . (lambda ()
+                         (require 'lsp-pyright)
+                         (lsp))))
+#+end_src
+
+* Notes
+#+begin_src emacs-lisp
+(setq org-agenda-log-mode-items '(closed clock state))
+(setq org-agenda-start-with-log-mode t)
+(setq org-log-repeat 'note)                  ;; ask note on repeats
+(setq org-log-into-drawer t)                 ;; keep log notes tidy
+#+end_src
