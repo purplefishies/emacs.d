@@ -44,6 +44,8 @@
  '(nrepl-message-colors
    '("#dc322f" "#cb4b16" "#b58900" "#5b7300" "#b3c34d" "#0061a8" "#2aa198" "#d33682" "#6c71c4"))
  '(ob-ipython-command "ipython")
+ '(org-latex-compiler "lualatex")
+ '(org-latex-pdf-process '("pdflatex -shell-escape -interaction nonstopmode %f"))
  '(org-modules
    '(org-habit org-bbdb org-bibtex org-ctags org-docview org-gnus org-info org-irc org-mhe org-rmail org-w3m org-learn))
  '(org-noter-always-create-frame t)
@@ -53,7 +55,7 @@
  '(org-roam-completion-system 'ivy)
  '(org-tags-match-list-sublevels nil)
  '(package-selected-packages
-   '(magit-delta dockerfile-mode rust-mode git-auto-commit-mode org-icalendar org-anki org-noter pdf-tools org-noter-pdftools org-contrib oauth2 color-theme-sanityinc-tomorrow-blue color-theme-sanityinc-blue color-theme base16-theme theme-buffet citar-org-roam pdf-tools org-pomodoro org-roam-ui org-chef ox-hugo ob-ess-julia ob-ipython clipboard-collector org-download org-gcal biblio-core org-roam-bibtex bitbake windresize org-caldav ox-gfm mu4e-alert ess ob-go ob-coffeescript yasnippet-snippets yasnippet highlight-doxygen all-the-icons flycheck-kotlin ledger-mode command-log-mode color-theme-sanityinc-tomorrow sanityinc-tomorrow-night solarized-theme deft ivy helm-org-rifle org-roam spice-mode projectile evil-magit forge dumb-jump ag rspec-mode chruby moody org-plus-contrib gnu-elpa-keyring-update org-journal kotlin-mode ensime cedit cdlatex ledger-import flycheck-ledger org-babel-eval-in-repl graphviz-dot-mode dot-mode org-drill-table dash yaml-mode scala-mode polymode passthword org-bullets org neotree markdown-mode json-mode groovy-mode gradle-mode gitignore-mode color-theme-modern cmake-mode chess bind-key auto-complete auctex))
+   '(lsp-pyright lsp-ui lsp-mode company-jedi helm-org magit-delta dockerfile-mode rust-mode git-auto-commit-mode org-icalendar org-anki org-noter pdf-tools org-noter-pdftools org-contrib oauth2 color-theme-sanityinc-tomorrow-blue color-theme-sanityinc-blue color-theme base16-theme theme-buffet citar-org-roam pdf-tools org-pomodoro org-roam-ui org-chef ox-hugo ob-ess-julia ob-ipython clipboard-collector org-download org-gcal biblio-core org-roam-bibtex bitbake windresize org-caldav ox-gfm mu4e-alert ess ob-go ob-coffeescript yasnippet-snippets yasnippet highlight-doxygen all-the-icons flycheck-kotlin ledger-mode command-log-mode color-theme-sanityinc-tomorrow sanityinc-tomorrow-night solarized-theme deft ivy helm-org-rifle org-roam spice-mode projectile evil-magit forge dumb-jump ag rspec-mode chruby moody org-plus-contrib gnu-elpa-keyring-update org-journal kotlin-mode ensime cedit cdlatex ledger-import flycheck-ledger org-babel-eval-in-repl graphviz-dot-mode dot-mode org-drill-table dash yaml-mode scala-mode polymode passthword org-bullets org neotree markdown-mode json-mode groovy-mode gradle-mode gitignore-mode color-theme-modern cmake-mode chess bind-key auto-complete auctex))
  '(pdf-annot-default-annotation-properties
    '((t
       (label . "Jimi Damon"))
