@@ -3618,6 +3618,31 @@ This is used for learning about the Python code base
                          (lsp))))
 #+end_src
 
+* AutoTimer
+#+begin_src emacs-lisp
+(defvar my-auto-scroll-timer nil)
+
+(defun my-auto-scroll-step ()
+  (condition-case nil
+      (scroll-up-command)
+    (end-of-buffer
+     (my-stop-auto-scroll))))
+
+(defun my-start-auto-scroll ()
+  (interactive)
+  (my-stop-auto-scroll)
+  (setq my-auto-scroll-timer
+        (run-with-timer 0 0.4 #'my-auto-scroll-step)))
+
+(defun my-stop-auto-scroll ()
+  (interactive)
+  (when (timerp my-auto-scroll-timer)
+    (cancel-timer my-auto-scroll-timer))
+  (setq my-auto-scroll-timer nil))
+#+end_src
+
+
+
 * Notes
 #+begin_src emacs-lisp
 (setq org-agenda-log-mode-items '(closed clock state))
