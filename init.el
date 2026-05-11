@@ -160,3 +160,22 @@ by Prelude.")
  (run-at-time 5 nil 'prelude-tip-of-the-day))
 
 ;;; init.el ends here
+(flyspell-mode-off)
+(prefer-coding-system 'utf-8)
+(set-default-coding-systems 'utf-8)
+(hl-line-mode nil)
+(flycheck-mode nil)
+(remove-hook 'prog-mode  #'flycheck-mode )
+(with-eval-after-load 'flycheck
+  (setq flycheck-display-errors-function nil))
+(global-flycheck-mode -1)
+(org-babel-load-file "~/.emacs.d/configuration.org")
+;; (add-hook  'cmake-hook
+;;            (lambda  )
+;;            )
+                                        ; (setq magit--git-w32-path-hack)
+;(electric-pair-mode -1)
+                                        ;()
+(setq electric-pair-mode nil)
+(smartparens-global-mode -1)
+(smartparens-mode
