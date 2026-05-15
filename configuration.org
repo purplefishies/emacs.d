@@ -4032,5 +4032,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 * Fons
-#+begin_src
+#+begin_src emacs-lisp
+(set-face-attribute 'default nil
+                    :family "DejaVuSansM Nerd Font Mono"
+                    :height 160)
 #+end_src
+
+#+RESULTS:
