@@ -4030,8 +4030,7 @@ document.addEventListener('DOMContentLoaded', function () {
 (setq TeX-command-extra-options "--shell-escape")
 #+end_src
 
-
-* Fons
+* Fonts
 #+begin_src emacs-lisp
 (set-face-attribute 'default nil
                     :family "DejaVuSansM Nerd Font Mono"
