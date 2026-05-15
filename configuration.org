@@ -4029,12 +4029,14 @@ document.addEventListener('DOMContentLoaded', function () {
 (setq TeX-engine 'luatex)
 (setq TeX-command-extra-options "--shell-escape")
 #+end_src
-
 * Fonts
 #+begin_src emacs-lisp
 (set-face-attribute 'default nil
                     :family "DejaVuSansM Nerd Font Mono"
                     :height 160)
+#+end_src
+
+#+begin_src
 #+end_src
 
 #+RESULTS:
