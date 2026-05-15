@@ -4029,3 +4029,6 @@ document.addEventListener('DOMContentLoaded', function () {
 (setq TeX-engine 'luatex)
 (setq TeX-command-extra-options "--shell-escape")
 #+end_src
+
+
+*
