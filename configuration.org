@@ -2481,6 +2481,9 @@ Hiding leading stars
            :unnarrowed t))))
 #+end_src
 
+#+RESULTS:
+: completion-at-point
+
 *** Insert nodes immediately without switching buffers
 :PROPERTIES:
 :ID:       550f0ee4-5567-4253-8242-0b1c43365fb9
