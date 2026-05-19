@@ -2181,8 +2181,6 @@ Hiding leading stars
                                 (concat dropbox-directory "tickler.org")
                                 (concat dropbox-directory "gtd.org")
                                 (concat dropbox-directory "archive.org")
-                                (concat dropbox-directory "gcal.org")
-                                (concat dropbox-directory "knowledge.org")
                                 (concat dropbox-directory "inbox.org")
                                 (concat dropbox-directory "reckoning.org")
                                 (concat dropbox-directory "work.org")
