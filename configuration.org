@@ -2186,7 +2186,7 @@ Hiding leading stars
                                 (concat dropbox-directory "inbox.org")
                                 (concat dropbox-directory "reckoning.org")
                                 (concat dropbox-directory "work.org")
-                                )
+                                "/home/jdamon/Projects/work/work.org"
                                ))
 
 (setq org-agenda-custom-commands
