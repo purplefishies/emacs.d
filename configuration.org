@@ -2184,7 +2184,7 @@ Hiding leading stars
                                 (concat dropbox-directory "inbox.org")
                                 (concat dropbox-directory "work.org")
                                 "/home/jdamon/Projects/work/work.org"
-                               ))
+                               )))
 
 (setq org-agenda-custom-commands
       `(("c" "Simple agenda view"
@@ -3698,7 +3698,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 #+end_src
-
 ** Auto save python
 #+begin_src emacs-lisp
 
