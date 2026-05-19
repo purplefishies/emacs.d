@@ -2182,7 +2182,6 @@ Hiding leading stars
                                 (concat dropbox-directory "gtd.org")
                                 (concat dropbox-directory "archive.org")
                                 (concat dropbox-directory "inbox.org")
-                                (concat dropbox-directory "reckoning.org")
                                 (concat dropbox-directory "work.org")
                                 "/home/jdamon/Projects/work/work.org"
                                ))
