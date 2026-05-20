@@ -4052,5 +4052,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 * org dimensions
-#+begin_src 
+#+begin_src emacs-lisp
+(setq display-mm-dimensions-alist
+      '((t . (344 . 194))))
 #+end_src
