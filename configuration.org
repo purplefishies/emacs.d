@@ -4056,3 +4056,69 @@ document.addEventListener('DOMContentLoaded', function () {
 (setq display-mm-dimensions-alist
       '((t . (344 . 194))))
 #+end_src
+
+
+* Tikz 
+
+#+begin_src emacs-lisp
+;; (with-eval-after-load 'org
+;; (setq org-latex-packages-alist
+;;       '(("" "tikz" t)
+;;         ("" "tikz-timing" t))))
+;; (setq org-latex-preview-debug t)
+;; (setq org-preview-latex-debug t)
+;; (setq org-latex-preview-auto-generate nil)
+;; (setq org-latex-preview-auto-delete nil)
+;; (defun jd/keep-org-preview-tex (orig file &rest args)
+;;   (let* ((debug-dir "/tmp/org-preview-debug/")
+;;          (stamp (format-time-string "%Y%m%d-%H%M%S"))
+;;          (base (concat debug-dir stamp "-" (file-name-base file))))
+;;     (make-directory debug-dir t)
+;;     (when (file-exists-p file)
+;;       (copy-file file (concat base ".tex") t))
+;;     (let ((result (apply orig file args)))
+;;       (dolist (ext '(".log" ".aux" ".dvi" ".pdf" ".png" ".svg"))
+;;         (let ((f (concat (file-name-sans-extension file) ext)))
+;;           (when (file-exists-p f)
+;;             (copy-file f (concat base ext) t))))
+;;       result)))
+;; (advice-add 'org-compile-file :around #'jd/keep-org-preview-tex)
+
+(setq org-preview-latex-default-process 'dvisvgm)
+
+(with-eval-after-load 'org
+  (setq org-latex-packages-alist
+        '(("" "tikz" t)
+          ("" "tikz-timing" t))))
+
+(with-eval-after-load 'org
+  (add-to-list 'org-latex-regexps
+               '("tikztimingtable"
+                 "\\\\begin{tikztimingtable}"
+                 "\\\\end{tikztimingtable}"
+                 nil)))
+
+(setq org-preview-latex-default-process 'dvisvgm)
+
+(setq org-format-latex-options
+      (plist-put org-format-latex-options :scale 1.7))
+
+
+
+(setenv "LATEX_HOME" "/home/jdamon/Latex")
+#+end_src
+
+
+* Org settings
+#+begin_src emacs-lisp
+(set-face-attribute 'org-todo nil
+  :box nil
+  :background nil)
+(vc-refresh-state)
+(setq doom-modeline-vcs-max-length 40)
+#+end_src
+
+#+RESULTS:
+
+
+
