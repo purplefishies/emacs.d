@@ -4115,6 +4115,7 @@ document.addEventListener('DOMContentLoaded', function () {
   :box nil
   :background nil)
 (vc-refresh-state)
+
 (setq doom-modeline-vcs-max-length 40)
 #+end_src
 
