@@ -160,6 +160,10 @@ by Prelude.")
  (run-at-time 5 nil 'prelude-tip-of-the-day))
 
 ;;; init.el ends here
+
+(guru-mode -1 )
+(guru-global-mode -1)
+
 (flyspell-mode-off)
 (prefer-coding-system 'utf-8)
 (set-default-coding-systems 'utf-8)
@@ -170,12 +174,63 @@ by Prelude.")
   (setq flycheck-display-errors-function nil))
 (global-flycheck-mode -1)
 (org-babel-load-file "~/.emacs.d/configuration.org")
-;; (add-hook  'cmake-hook
-;;            (lambda  )
-;;            )
-                                        ; (setq magit--git-w32-path-hack)
-;(electric-pair-mode -1)
+(electric-pair-mode -1)
                                         ;()
 (setq electric-pair-mode nil)
 (smartparens-global-mode -1)
-(smartparens-mode
+(setq prelude-smartparens nil)
+
+
+ ;; Disable guru-mode everywhere
+ (setq prelude-guru nil)
+
+ (with-eval-after-load 'guru-mode
+   (when (fboundp 'guru-mode)
+     (guru-mode -1))
+   )
+(delete-selection-mode -1)
+(use-package doom-modeline
+  :ensure t
+  :init
+  (doom-modeline-mode 1)
+  )
+
+(setq prelude-clean-whitespace-on-save nil)
+(setq prelude-whitespace nil)
+
+
+(global-unset-key (kbd "S-<left>"))
+(global-unset-key (kbd "S-<right>"))
+(global-unset-key (kbd "S-<up>"))
+(global-unset-key (kbd "S-<down>"))
+
+(with-eval-after-load 'org
+  (add-hook 'org-mode-hook
+            (lambda ()
+              (local-set-key (kbd "S-<left>")  #'org-shiftleft)
+              (local-set-key (kbd "S-<right>") #'org-shiftright)
+              (local-set-key (kbd "<S-left>")  #'org-shiftleft)
+              (local-set-key (kbd "<S-right>") #'org-shiftright))))
+
+
+(use-package leuven-theme
+  :ensure t
+  :config
+  (load-theme 'leuven-dark t))
+; Disable overlines
+(with-eval-after-load 'org
+  (dolist (face (face-list))
+    (when (string-prefix-p "org-" (symbol-name face))
+      (set-face-attribute face nil :overline nil))))
+
+
+
+(where-is 'crux-cleanup-buffer-or-region)
+
+
+;; ~/.emacs.d/init.el
+(require 'server)
+(unless (server-running-p)
+  (server-start))
+
+
