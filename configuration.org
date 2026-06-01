@@ -4122,3 +4122,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 
+* Linux Kernel settings
+#+begin_src 
+#+end_src
