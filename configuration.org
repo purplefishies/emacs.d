@@ -4123,5 +4123,18 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 * Linux Kernel settings
-#+begin_src 
+#+begin_src emacs-lisp
+;; Linux kernel coding style
+(defun linux-kernel-c-mode-style ()
+  "C mode settings for Linux kernel development."
+  (interactive)
+  (c-mode)
+  (c-set-style "linux")
+  (setq tab-width 8)
+  (setq indent-tabs-mode t)
+  (setq c-basic-offset 8))
+
+(add-to-list 'auto-mode-alist
+             '("/linux.*/.*\\.[ch]$" . linux-kernel-c-mode-style))
 #+end_src
+
