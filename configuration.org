@@ -4138,3 +4138,7 @@ document.addEventListener('DOMContentLoaded', function () {
              '("/linux.*/.*\\.[ch]$" . linux-kernel-c-mode-style))
 #+end_src
 
+
+* Verilog
+#+begin_src 
+#+end_src
