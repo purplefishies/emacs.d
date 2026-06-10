@@ -4140,5 +4140,18 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 * Verilog
-#+begin_src 
+#+begin_src emacs-lisp
+(use-package verilog-mode
+  :mode (("\\.v\\'" . verilog-mode)
+         ("\\.sv\\'" . verilog-mode)
+         ("\\.va\\'" . verilog-mode)
+         ("\\.vams\\'" . verilog-mode)))
+
+(font-lock-add-keywords
+ 'verilog-mode
+ '(("\\<\\(analog\\|electrical\\|discipline\\|nature\\|branch\\)\\>"
+    . font-lock-keyword-face)))
+
 #+end_src
+
+
