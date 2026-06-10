@@ -4147,6 +4147,7 @@ document.addEventListener('DOMContentLoaded', function () {
          ("\\.va\\'" . verilog-mode)
          ("\\.vams\\'" . verilog-mode)))
 
+
 (font-lock-add-keywords
  'verilog-mode
  '(("\\<\\(analog\\|electrical\\|discipline\\|nature\\|branch\\)\\>"
