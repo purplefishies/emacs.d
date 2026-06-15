@@ -4181,7 +4181,7 @@ document.addEventListener('DOMContentLoaded', function () {
 (use-package org-anki
   :ensure t
   :config
-  (setq org-anki-default-deck "Work")) ; Match your pre-existing Anki deck name
+  (setq org-anki-default-deck "Default")) ; Match your pre-existing Anki deck name
 #+end_src
 
 #+RESULTS:
