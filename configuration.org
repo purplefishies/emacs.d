@@ -4177,5 +4177,9 @@ document.addEventListener('DOMContentLoaded', function () {
 | http | https |
 
 * Org Anki
-#+begin_src 
+#+begin_src emacs-lisp
+(use-package org-anki
+  :ensure t
+  :config
+  (setq org-anki-default-deck "My Target Deck")) ; Match your pre-existing Anki deck name
 #+end_src
