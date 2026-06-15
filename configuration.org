@@ -4060,28 +4060,6 @@ document.addEventListener('DOMContentLoaded', function () {
 * Tikz 
 
 #+begin_src emacs-lisp
-;; (with-eval-after-load 'org
-;; (setq org-latex-packages-alist
-;;       '(("" "tikz" t)
-;;         ("" "tikz-timing" t))))
-;; (setq org-latex-preview-debug t)
-;; (setq org-preview-latex-debug t)
-;; (setq org-latex-preview-auto-generate nil)
-;; (setq org-latex-preview-auto-delete nil)
-;; (defun jd/keep-org-preview-tex (orig file &rest args)
-;;   (let* ((debug-dir "/tmp/org-preview-debug/")
-;;          (stamp (format-time-string "%Y%m%d-%H%M%S"))
-;;          (base (concat debug-dir stamp "-" (file-name-base file))))
-;;     (make-directory debug-dir t)
-;;     (when (file-exists-p file)
-;;       (copy-file file (concat base ".tex") t))
-;;     (let ((result (apply orig file args)))
-;;       (dolist (ext '(".log" ".aux" ".dvi" ".pdf" ".png" ".svg"))
-;;         (let ((f (concat (file-name-sans-extension file) ext)))
-;;           (when (file-exists-p f)
-;;             (copy-file f (concat base ext) t))))
-;;       result)))
-;; (advice-add 'org-compile-file :around #'jd/keep-org-preview-tex)
 
 (setq org-preview-latex-default-process 'dvisvgm)
 
