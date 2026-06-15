@@ -4156,3 +4156,26 @@ document.addEventListener('DOMContentLoaded', function () {
 #+end_src
 
 
+* Yanking media
+#+begin_src emacs-lisp
+(use-package org-download
+  :ensure t
+  :after org
+  :bind (:map org-mode-map
+              ("C-M-y" . org-download-clipboard)))
+#+end_src
+
+#+RESULTS:
+: org-download-clipboard
+
+* Org Roam
+#+begin_src emacs-lisp
+(setq org-roam-graph-link-hidden-types '("http" "https"))
+#+end_src
+
+#+RESULTS:
+| http | https |
+
+* Org Anki
+#+begin_src 
+#+end_src
