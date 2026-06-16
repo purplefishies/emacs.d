@@ -79,7 +79,7 @@
     smartparens
     smartrep
     super-save
-    undo-tree
+    ;undo-tree
     volatile-highlights
     which-key
     zenburn-theme

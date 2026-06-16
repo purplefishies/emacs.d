@@ -227,6 +227,9 @@ by Prelude.")
 
 (where-is 'crux-cleanup-buffer-or-region)
 
+(with-eval-after-load 'undo-tree
+  (global-undo-tree-mode -1))
+(remove-hook 'after-init-hook #'global-undo-tree-mode)
 
 ;; ~/.emacs.d/init.el
 (require 'server)
