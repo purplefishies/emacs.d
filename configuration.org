@@ -4180,12 +4180,7 @@ document.addEventListener('DOMContentLoaded', function () {
   :hook (c++-mode . doxymacs-mode)
   :config
   ;; Force Doxymacs bindings after crux has had its chance
-  (define-key c++-mode-map (kbd "C-c d ?") #'doxymacs-lookup)
-  (define-key c++-mode-map (kbd "C-c d f") #'doxymacs-insert-function-comment)
-  (define-key c++-mode-map (kbd "C-c d i") #'doxymacs-insert-file-comment)
-  (define-key c++-mode-map (kbd "C-c d ;") #'doxymacs-insert-member-comment)
-  (define-key c++-mode-map (kbd "C-c d m") #'doxymacs-insert-blank-multiline-comment)
-  (define-key c++-mode-map (kbd "C-c d s") #'doxymacs-insert-blank-singleline-comment))
+
 #+end_src
 
 #+RESULTS:
