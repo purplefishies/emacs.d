@@ -4187,6 +4187,12 @@ document.addEventListener('DOMContentLoaded', function () {
   (define-key c-mode-base-map (kbd "C-c d m") #'doxymacs-insert-blank-multiline-comment)
   (define-key c-mode-base-map (kbd "C-c d s") #'doxymacs-insert-blank-singleline-comment))
 
-#+end_src
+;; Final override after all packages initialize.
+(add-hook 'emacs-startup-hook
+          (lambda ()
+            (global-unset-key (kbd "C-c d"))
+            (global-set-key (kbd "C-c D")
+                            #'crux-duplicate-current-line-or-region)))
 
+#+end_src
 
