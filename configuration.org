@@ -4185,6 +4185,18 @@ document.addEventListener('DOMContentLoaded', function () {
 ;;   :config
 ;;   ;; Force Doxymacs bindings after crux has had its chance
 
+(with-eval-after-load 'crux
+  ;; Stop crux from owning C-c d
+  (global-unset-key (kbd "C-c d"))
+
+  ;; Give C-c d back to doxymacs
+  (define-key global-map (kbd "C-c d ?") #'doxymacs-lookup)
+  (define-key global-map (kbd "C-c d f") #'doxymacs-insert-function-comment)
+  (define-key global-map (kbd "C-c d i") #'doxymacs-insert-file-comment)
+  (define-key global-map (kbd "C-c d ;") #'doxymacs-insert-member-comment)
+  (define-key global-map (kbd "C-c d m") #'doxymacs-insert-blank-multiline-comment)
+  (define-key global-map (kbd "C-c d s") #'doxymacs-insert-blank-singleline-comment))
+
 #+end_src
 
 
