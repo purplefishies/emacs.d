@@ -4161,3 +4161,8 @@ document.addEventListener('DOMContentLoaded', function () {
   :config
   (setq org-anki-default-deck "Default")) ; Match your pre-existing Anki deck name
 #+end_src
+
+
+* Doxymacs
+#+begin_src 
+#+end_src
