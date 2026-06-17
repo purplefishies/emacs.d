@@ -4165,16 +4165,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
 * Doxymacs
 #+begin_src emacs-lisp
+
 (use-package crux
-  :ensure t
   :bind
-  (("C-c o" . crux-open-with)
-   ("C-c k" . crux-smart-kill-line)))
+  (("C-c D" . crux-duplicate-current-line-or-region))
+  :config
+  (global-unset-key (kbd "C-c d")))
 
-
-(with-eval-after-load 'crux
-  (global-unset-key (kbd "C-c d"))
-  (global-set-key (kbd "C-c D") #'crux-duplicate-current-line-or-region))
 
 (use-package doxymacs
   :ensure t
