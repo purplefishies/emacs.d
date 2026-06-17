@@ -4171,6 +4171,10 @@ document.addEventListener('DOMContentLoaded', function () {
   (("C-c o" . crux-open-with)
    ("C-c k" . crux-smart-kill-line)))
 
+(with-eval-after-load 'crux
+  (global-unset-key (kbd "C-c d"))
+  (global-set-key (kbd "C-c D") #'crux-duplicate-current-line-or-region))
+
 (with-eval-after-load 'cc-mode
   (define-key c-mode-base-map (kbd "C-c d f")
     #'doxymacs-insert-function-comment))
