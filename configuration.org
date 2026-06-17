@@ -4178,7 +4178,6 @@ document.addEventListener('DOMContentLoaded', function () {
 ;; (with-eval-after-load 'cc-mode
 ;;   (define-key c-mode-base-map (kbd "C-c d f")
 ;;     #'doxymacs-insert-function-comment))
-
 ;; (use-package doxymacs
 ;;   :ensure t
 ;;   :hook (c++-mode . doxymacs-mode)
