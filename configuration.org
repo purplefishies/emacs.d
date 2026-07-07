@@ -732,7 +732,6 @@ I like tree-based undo management. I only rarely need it, but when I do, oh boy.
 (add-hook 'prog-mode-hook 'hs-minor-mode)
 (setq display-line-numbers-width 5)
 (setq display-line-numbers-grow-only t)
-
 #+end_src
 
 *** Adds custom C/C++ headers
