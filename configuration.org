@@ -701,17 +701,6 @@ project root (if I'm not in a "real" project).
     (setq projectile-require-project-root nil))
 #+END_SRC
 
-** =undo-tree=
-   :PROPERTIES:
-   :ID:       ec238dcf-37dd-42d8-9379-53cf863cd2fb
-   :END:
-
-I like tree-based undo management. I only rarely need it, but when I do, oh boy.
-
-#+BEGIN_SRC emacs-lisp
-  (use-package undo-tree)
-#+END_SRC
-
 * Language Support and Development Environments
 
 ** C / C++
@@ -2607,6 +2596,10 @@ Hiding leading stars
   :no-require
   :config (citar-embark-mode))
 
+(use-package embark-consult
+  :ensure t
+  :after (embark consult))
+
 #+end_src
 ** Org Dailies with Org Roam
 :PROPERTIES:
@@ -4168,13 +4161,6 @@ document.addEventListener('DOMContentLoaded', function () {
 * Doxymacs
 #+begin_src emacs-lisp
 
-(use-package crux
-  :bind
-  (("C-c D" . crux-duplicate-current-line-or-region))
-  :config
-  (global-unset-key (kbd "C-c d")))
-
-
 (use-package doxymacs
   :ensure t
   :after cc-mode
@@ -4189,17 +4175,11 @@ document.addEventListener('DOMContentLoaded', function () {
   (define-key c-mode-base-map (kbd "C-c d m") #'doxymacs-insert-blank-multiline-comment)
   (define-key c-mode-base-map (kbd "C-c d s") #'doxymacs-insert-blank-singleline-comment))
 
-;; Final override after all packages initialize.
-(add-hook 'emacs-startup-hook
-          (lambda ()
-            (global-unset-key (kbd "C-c d"))
-            (global-set-key (kbd "C-c D")
-                            #'crux-duplicate-current-line-or-region)))
-
 #+end_src
 
 
 * SVG Bob
 #+begin_src emacs-lisp
-(require 'ob-svgbob)
+(use-package ob-svgbob
+  :ensure t)
 #+end_src
