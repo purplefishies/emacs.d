@@ -3423,7 +3423,6 @@ Magit
   :custom
   (magit-delta-delta-args '("--navigate" "--line-numbers")))
 #+end_src
-
 * Auto commit org (and shell)
 #+begin_src emacs-lisp
 
@@ -4205,4 +4204,17 @@ document.addEventListener('DOMContentLoaded', function () {
 
 #+end_src
 
+* Color settings
+#+begin_src emacs-lisp
+(progn
+    (set-face-attribute 'org-agenda-current-time nil :foreground "chartreuse")
+    (set-face-attribute 'org-agenda-done nil :foreground "sea green")
+    (set-face-attribute 'org-done nil :foreground "sea green" :weight 'bold)
+    (set-face-attribute 'org-level-4 nil :foreground "light goldenrod")
+    (set-face-attribute 'org-priority nil :foreground "light goldenrod")
+    (set-face-attribute 'org-scheduled nil :foreground "light salmon")
+    (set-face-attribute 'org-scheduled-today nil :foreground "light goldenrod")
+    (set-face-attribute 'org-time-grid nil :foreground "PaleGreen4")
+    (set-face-attribute 'org-warning nil :foreground "salmon" :weight 'bold))
+#+end_src
 
