@@ -4187,5 +4187,23 @@ document.addEventListener('DOMContentLoaded', function () {
 
 * Jumping around headings
 
-#+begin_src 
+#+begin_src emacs-lisp
+
+  (defun jmd/org-next-visible-heading (&optional arg)
+    "Move forward ARG visible headings, defaulting to 3."
+    (interactive "P")
+    (org-next-visible-heading
+     (if arg (prefix-numeric-value arg) 3)))
+
+  (defun jmd/org-previous-visible-heading (&optional arg)
+    "Move backward ARG visible headings, defaulting to 3."
+    (interactive "P")
+    (org-previous-visible-heading
+     (if arg (prefix-numeric-value arg) 3)))
+
+  (with-eval-after-load 'org
+    (keymap-set org-mode-map "C-<down>" #'jmd/org-next-visible-heading)
+    (keymap-set org-mode-map "C-<up>" #'jmd/org-previous-visible-heading))
+
 #+end_src
+
