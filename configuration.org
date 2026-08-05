@@ -552,8 +552,6 @@ YEAR/Month subdirectory based on the org file name, and insert a link."
 
 #+end_src
 
-
-
 * Project management
 
 I use a few packages in virtually every programming or writing environment to
