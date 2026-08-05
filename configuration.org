@@ -4183,3 +4183,9 @@ document.addEventListener('DOMContentLoaded', function () {
 (use-package ob-svgbob
   :ensure t)
 #+end_src
+
+
+* Jumping around headings
+
+#+begin_src 
+#+end_src
