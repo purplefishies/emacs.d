@@ -4218,3 +4218,62 @@ document.addEventListener('DOMContentLoaded', function () {
     (set-face-attribute 'org-warning nil :foreground "salmon" :weight 'bold))
 #+end_src
 
+
+
+* Yank media images
+#+begin_src emacs-lisp
+(require (quote yank-media))
+
+(defun jmd/yank-media--image-extension (media-type)
+  "Return a sensible filename extension for image MEDIA-TYPE."
+  (pcase (symbol-name media-type)
+    ("image/jpeg" "jpg")
+    ("image/svg+xml" "svg")
+    ((and type (pred (string-prefix-p "image/")))
+     (replace-regexp-in-string
+      "[^[:alnum:]]+" "-" (substring type (length "image/"))))
+    (_ (user-error "Unsupported clipboard media type: %s" media-type))))
+
+(defun jmd/yank-media--available-file (directory extension)
+  "Return a new timestamped filename in DIRECTORY with EXTENSION."
+  (let* ((stem (format-time-string "clipboard-%Y%m%dT%H%M%S"))
+         (file (expand-file-name (format "%s.%s" stem extension) directory))
+         (number 2))
+    (while (file-exists-p file)
+      (setq file (expand-file-name
+                  (format "%s-%d.%s" stem number extension)
+                  directory)
+            number (1+ number)))
+    file))
+
+(defun jmd/yank-media--save-org-image (media-type data)
+  "Save image DATA of MEDIA-TYPE and insert an Org file link to it."
+  (let* ((directory
+          (expand-file-name
+           (format-time-string "%Y/%b/")
+           "~/Dropbox/org/Images/"))
+         (file (jmd/yank-media--available-file
+                directory (jmd/yank-media--image-extension media-type)))
+         (link (file-relative-name
+                file
+                (if buffer-file-name
+                    (file-name-directory buffer-file-name)
+                  default-directory))))
+    (make-directory directory t)
+    (let ((coding-system-for-write (quote binary)))
+      (write-region data nil file nil (quote silent)))
+    (insert (org-link-make-string (concat "file:" link)))
+    (when (org-invisible-p)
+      (org-reveal))
+    (org-display-inline-images)
+    (message "Saved clipboard image to %s" (abbreviate-file-name file))))
+
+(defun jmd/yank-media ()
+  "Yank a clipboard image into ~/Dropbox/org/Images/YYYY/Mon/."
+  (interactive)
+  ;; Override Org attachment handler for this invocation only.
+  (let ((yank-media--registered-handlers
+         (quote (("\`image/" . jmd/yank-media--save-org-image)))))
+    (yank-media)))
+#+end_src
+
