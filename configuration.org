@@ -4262,18 +4262,26 @@ document.addEventListener('DOMContentLoaded', function () {
     (make-directory directory t)
     (let ((coding-system-for-write (quote binary)))
       (write-region data nil file nil (quote silent)))
-    (insert (org-link-make-string (concat "file:" link)))
+    (insert "#+ATTR_ORG: :width 400\n"
+            (org-link-make-string (concat "file:" link))
+            "\n")
     (when (org-invisible-p)
       (org-reveal))
     (org-display-inline-images)
     (message "Saved clipboard image to %s" (abbreviate-file-name file))))
 
-(defun jmd/yank-media ()
-  "Yank a clipboard image into ~/Dropbox/org/Images/YYYY/Mon/."
-  (interactive)
-  ;; Override Org attachment handler for this invocation only.
-  (let ((yank-media--registered-handlers
-         (quote (("\`image/" . jmd/yank-media--save-org-image)))))
-    (yank-media)))
-#+end_src
+(defun jmd/yank-media--around (original &rest arguments)
+  "Use the custom image handler when ORIGINAL runs in an Org buffer."
+  (if (derived-mode-p (quote org-mode))
+      (let ((yank-media--registered-handlers
+             (quote (("image/" . jmd/yank-media--save-org-image)))))
+        (apply original arguments))
+    (apply original arguments)))
 
+(defun jmd/yank-media ()
+  "Yank media, saving Org images under Images/YYYY/Mon/ ."
+  (interactive)
+  (call-interactively (function yank-media)))
+
+(advice-add (quote yank-media) :around (function jmd/yank-media--around))
+#+end_src
