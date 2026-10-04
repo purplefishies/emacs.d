@@ -4285,3 +4285,34 @@ document.addEventListener('DOMContentLoaded', function () {
 
 (advice-add (quote yank-media) :around (function jmd/yank-media--around))
 #+end_src
+
+
+* Web browser selection
+#+begin_src emacs-lisp
+(require (quote browse-url))
+(require (quote seq))
+
+(defcustom jmd/browse-url-programs
+  (quote ("chromium" "chromium-browser"
+          "google-chrome-stable" "google-chrome"
+          "firefox"))
+  "Browser programs to try, in preference order."
+  :type (quote (repeat string))
+  :group (quote browse-url))
+
+(defun jmd/browse-url (url &optional new-window)
+  "Open URL with the first installed browser in `jmd/browse-url-programs`.
+Fall back to the desktop default when none of those programs exists."
+  (interactive (browse-url-interactive-arg "URL: "))
+  (if-let ((program (seq-find (function executable-find)
+                              jmd/browse-url-programs)))
+      (let ((browse-url-generic-program program))
+        (browse-url-generic url new-window))
+    (browse-url-default-browser url new-window)))
+
+(setq browse-url-browser-function (function jmd/browse-url))
+
+(with-eval-after-load (quote org)
+  (add-to-list (quote org-file-apps)
+               (quote ("html?$" . jmd/browse-url))))
+#+end_src
