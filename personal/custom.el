@@ -12,7 +12,9 @@
  ;; If there is more than one, they won't work right.
  '(org-agenda-calendar-event ((t (:background "#3e322a" :foreground "dark sea green" :overline nil :weight bold))))
  '(org-agenda-done ((t (:foreground "aquamarine4" :strike-through t :overline nil))))
+ '(org-agenda-structure ((t (:inherit font-lock-comment-face :foreground "#D0A875" :overline nil :weight bold :height 1.6))))
  '(org-headline-done ((t (:foreground "#376F5D" :strike-through t :overline nil :weight normal :height 1.0))))
- '(org-scheduled-previously ((t (:foreground "tomato" :box nil :overline nil))))
+ '(org-scheduled-previously ((t (:foreground "salmon" :box nil :overline nil))))
+ '(org-scheduled-today ((t (:background "#252059" :foreground "#B9A7D8" :overline nil :weight bold))))
  '(org-time-grid ((t (:foreground "deep sky blue" :overline nil))))
  '(org-todo ((t (:foreground "tomato" :box (:line-width (1 . 1) :color "#2c5462") :overline nil :weight bold)))))

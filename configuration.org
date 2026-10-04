@@ -4316,3 +4316,60 @@ Fall back to the desktop default when none of those programs exists."
   (add-to-list (quote org-file-apps)
                (quote ("html?$" . jmd/browse-url))))
 #+end_src
+
+
+* Import and display PDFs in Org
+#+begin_src emacs-lisp
+(use-package org-inline-pdf
+  :ensure t
+  :after org
+  :hook (org-mode . org-inline-pdf-mode))
+
+(defun jmd/pdf--unique-destination (directory filename)
+  "Return an unused path for FILENAME in DIRECTORY."
+  (let* ((extension (file-name-extension filename t))
+         (stem (file-name-sans-extension filename))
+         (destination (expand-file-name filename directory))
+         (number 2))
+    (while (file-exists-p destination)
+      (setq destination
+            (expand-file-name
+             (format "%s-%d%s" stem number extension)
+             directory)
+            number (1+ number)))
+    destination))
+
+(defun jmd/org-import-pdf (source)
+  "Copy PDF SOURCE into Images/YYYY/Mon beside the current Org file.
+Insert a relative Org link and display its first page inline."
+  (interactive
+   (list (read-file-name "PDF to import: " nil nil t nil
+                         (lambda (file)
+                           (or (file-directory-p file)
+                               (string-equal
+                                (downcase (or (file-name-extension file) ""))
+                                "pdf"))))))
+  (unless buffer-file-name
+    (user-error "Save this Org buffer before importing a PDF"))
+  (unless (and (file-regular-p source)
+               (string-equal (downcase (or (file-name-extension source) ""))
+                             "pdf"))
+    (user-error "Not a readable PDF file: %s" source))
+  (let* ((org-directory (file-name-directory buffer-file-name))
+         (directory (expand-file-name
+                     (format-time-string "Images/%Y/%b/")
+                     org-directory))
+         (destination
+          (jmd/pdf--unique-destination
+           directory (file-name-nondirectory source)))
+         (link (file-relative-name destination org-directory)))
+    (make-directory directory t)
+    (copy-file source destination)
+    (insert "#+ATTR_ORG: :width 400\n"
+            (org-link-make-string (concat "file:" link))
+            "\n")
+    (unless (bound-and-true-p org-inline-pdf-mode)
+      (org-inline-pdf-mode 1))
+    (org-display-inline-images)
+    (message "Imported PDF to %s" (abbreviate-file-name destination))))
+#+end_src
